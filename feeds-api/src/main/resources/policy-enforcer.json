@@ -21,7 +21,7 @@
       "enforcement-mode": "DISABLED"
     },
     {
-      "path": "/api/v1/users/email/{email}",
+      "path": "/api/v1/*",
       "enforcement-mode": "DISABLED"
     }
   ]
