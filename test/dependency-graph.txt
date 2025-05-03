@@ -1,5 +1,0 @@
-core-email:compile
-\- core-exception:compile
-   \- core-utils:compile
-feeds-api:compile
-\- core-exception:compile
