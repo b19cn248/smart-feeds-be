@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="002-create-subscription-table" author="smartfeed-developer">
+        <comment>Create subscription table for user plans</comment>
+        <createTable tableName="subscriptions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="type" type="varchar(50)"/>
+            <column name="start_date" type="date"/>
+            <column name="end_date" type="date"/>
+            <column name="price_per_month" type="decimal(10,2)"/>
+            <column name="active" type="boolean"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-settings-table" author="smartfeed-developer">
+        <comment>Create settings table for user preferences</comment>
+        <createTable tableName="settings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="language" type="varchar(50)"/>
+            <column name="interface_theme" type="varchar(50)"/>
+            <column name="notification_frequency" type="int"/>
+            <column name="preferred_categories" type="text"/>
+            <column name="platform" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-read-later-lists-table" author="smartfeed-developer">
+        <comment>Create read_later_lists table for saving articles</comment>
+        <createTable tableName="read_later_lists">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="user_id" type="bigint"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-users-table" author="smartfeed-developer">
+        <comment>Create users table for user management</comment>
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="location" type="varchar(255)"/>
+            <column name="preferences" type="text"/>
+            <column name="points" type="int" defaultValueNumeric="0"/>
+            <column name="settings_id" type="bigint">
+                <constraints foreignKeyName="fk_users_settings" references="settings(id)"/>
+            </column>
+            <column name="read_later_list_id" type="bigint">
+                <constraints foreignKeyName="fk_users_read_later_lists" references="read_later_lists(id)"/>
+            </column>
+            <column name="subscription_id" type="bigint">
+                <constraints foreignKeyName="fk_users_subscriptions" references="subscriptions(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-enterprises-table" author="smartfeed-developer">
+        <comment>Create enterprises table for business accounts</comment>
+        <createTable tableName="enterprises">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="company_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="industry" type="varchar(100)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-technical-users-table" author="smartfeed-developer">
+        <comment>Create technical_users table for advanced users</comment>
+        <createTable tableName="technical_users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="expertise_level" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Add foreign key constraints after all tables exist -->
+    <changeSet id="002-add-foreign-keys-for-user-management" author="smartfeed-developer">
+        <comment>Add foreign key constraints for user management tables</comment>
+
+        <!-- Add foreign key for read_later_lists to users -->
+        <addForeignKeyConstraint baseTableName="read_later_lists"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_read_later_lists_users"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

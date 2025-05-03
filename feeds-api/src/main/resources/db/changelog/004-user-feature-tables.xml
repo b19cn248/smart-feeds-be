@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="004-create-read-later-items-table" author="smartfeed-developer">
+        <comment>Create read_later_items table for saved articles</comment>
+        <createTable tableName="read_later_items">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="read_later_list_id" type="bigint">
+                <constraints foreignKeyName="fk_read_later_items_lists" references="read_later_lists(id)"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_read_later_items_articles" references="articles(id)"/>
+            </column>
+            <column name="added_at" type="timestamp"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="read_later_items"
+                             columnNames="read_later_list_id, article_id"
+                             constraintName="uk_read_later_items"/>
+    </changeSet>
+
+    <changeSet id="004-create-reading-histories-table" author="smartfeed-developer">
+        <comment>Create reading_histories table for tracking activity</comment>
+        <createTable tableName="reading_histories">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_reading_histories_users" references="users(id)"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_reading_histories_articles" references="articles(id)"/>
+            </column>
+            <column name="read_time" type="timestamp"/>
+            <column name="read_duration" type="int"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-user-articles-table" author="smartfeed-developer">
+        <comment>Create user_articles junction table</comment>
+        <createTable tableName="user_articles">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_user_articles_users" references="users(id)"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_user_articles_articles" references="articles(id)"/>
+            </column>
+            <column name="read_status" type="boolean" defaultValueBoolean="false"/>
+            <column name="read_time" type="timestamp"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="user_articles"
+                             columnNames="user_id, article_id"
+                             constraintName="uk_user_articles"/>
+    </changeSet>
+
+    <changeSet id="004-create-goals-table" author="smartfeed-developer">
+        <comment>Create goals table for gamification</comment>
+        <createTable tableName="goals">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="target" type="int"/>
+            <column name="progress" type="int" defaultValueNumeric="0"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_goals_users" references="users(id)"/>
+            </column>
+            <column name="completed" type="boolean" defaultValueBoolean="false"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-notifications-table" author="smartfeed-developer">
+        <comment>Create notifications table for user alerts</comment>
+        <createTable tableName="notifications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="varchar(512)"/>
+            <column name="delivery_method" type="varchar(50)"/>
+            <column name="timestamp" type="timestamp"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_notifications_users" references="users(id)"/>
+            </column>
+            <column name="is_read" type="boolean" defaultValueBoolean="false"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-searches-table" author="smartfeed-developer">
+        <comment>Create searches table for saved searches</comment>
+        <createTable tableName="searches">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="query" type="varchar(512)"/>
+            <column name="filters" type="text"/>
+            <column name="timestamp" type="timestamp"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_searches_users" references="users(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-alerts-table" author="smartfeed-developer">
+        <comment>Create alerts table for custom alerts</comment>
+        <createTable tableName="alerts">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="varchar(512)"/>
+            <column name="trigger" type="varchar(255)"/>
+            <column name="timestamp" type="timestamp"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_alerts_users" references="users(id)"/>
+            </column>
+            <column name="active" type="boolean" defaultValueBoolean="true"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-feedbacks-table" author="smartfeed-developer">
+        <comment>Create feedbacks table for user feedback</comment>
+        <createTable tableName="feedbacks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="text"/>
+            <column name="rating" type="int"/>
+            <column name="timestamp" type="timestamp"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_feedbacks_users" references="users(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-badges-table" author="smartfeed-developer">
+        <comment>Create badges table for achievements</comment>
+        <createTable tableName="badges">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="image_url" type="varchar(512)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-create-user-badges-table" author="smartfeed-developer">
+        <comment>Create user_badges junction table</comment>
+        <createTable tableName="user_badges">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_user_badges_users" references="users(id)"/>
+            </column>
+            <column name="badge_id" type="bigint">
+                <constraints foreignKeyName="fk_user_badges_badges" references="badges(id)"/>
+            </column>
+            <column name="earned_at" type="timestamp"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="user_badges"
+                             columnNames="user_id, badge_id"
+                             constraintName="uk_user_badges"/>
+    </changeSet>
+
+    <changeSet id="004-create-integrations-table" author="smartfeed-developer">
+        <comment>Create integrations table for external services</comment>
+        <createTable tableName="integrations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="service" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="api_key" type="varchar(512)"/>
+            <column name="status" type="varchar(50)"/>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_integrations_users" references="users(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

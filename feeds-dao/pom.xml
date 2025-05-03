@@ -25,6 +25,11 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.olh.feeds</groupId>
+            <artifactId>feeds-dto</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

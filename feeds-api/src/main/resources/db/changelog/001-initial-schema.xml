@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <!-- Common column types as property tags - đặt ở cấp độ cao nhất -->
+    <property name="now" value="NOW()" dbms="mysql"/>
+    <property name="bigint" value="BIGINT" dbms="mysql"/>
+    <property name="varchar_255" value="VARCHAR(255)" dbms="mysql"/>
+    <property name="varchar_512" value="VARCHAR(512)" dbms="mysql"/>
+    <property name="text" value="TEXT" dbms="mysql"/>
+    <property name="timestamp" value="TIMESTAMP" dbms="mysql"/>
+    <property name="boolean" value="BOOLEAN" dbms="mysql"/>
+
+    <changeSet id="001-initial-schema" author="smartfeed-developer">
+        <comment>Create database schema for the SmartFeed application</comment>
+
+        <sql>
+            CREATE DATABASE IF NOT EXISTS smart_feed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            USE smart_feed;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

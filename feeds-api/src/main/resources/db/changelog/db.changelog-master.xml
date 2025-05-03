@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <!-- Initial schema setup -->
+    <include file="classpath:db/changelog/001-initial-schema.xml"/>
+
+    <!-- User Management Tables -->
+    <include file="classpath:db/changelog/002-user-management-tables.xml"/>
+
+    <!-- Content Management Tables -->
+    <include file="classpath:db/changelog/003-content-management-tables.xml"/>
+
+    <!-- User Feature Tables -->
+    <include file="classpath:db/changelog/004-user-feature-tables.xml"/>
+
+    <!-- Enterprise Feature Tables -->
+    <include file="classpath:db/changelog/005-enterprise-feature-tables.xml"/>
+
+    <!-- Technical Feature Tables -->
+    <include file="classpath:db/changelog/006-technical-feature-tables.xml"/>
+
+</databaseChangeLog>

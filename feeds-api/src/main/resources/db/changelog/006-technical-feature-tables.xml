@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="006-create-self-hosted-instances-table" author="smartfeed-developer">
+        <comment>Create self_hosted_instances table for deployments</comment>
+        <createTable tableName="self_hosted_instances">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="server_address" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deployment_type" type="varchar(100)"/>
+            <column name="documentation" type="text"/>
+            <column name="open_source_status" type="boolean"/>
+            <column name="technical_user_id" type="bigint">
+                <constraints foreignKeyName="fk_self_hosted_instances_technical_users" references="technical_users(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-create-apis-table" author="smartfeed-developer">
+        <comment>Create apis table for integration</comment>
+        <createTable tableName="apis">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="endpoint" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_key" type="varchar(512)"/>
+            <column name="version" type="varchar(50)"/>
+            <column name="self_hosted_instance_id" type="bigint">
+                <constraints foreignKeyName="fk_apis_self_hosted_instances" references="self_hosted_instances(id)"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
