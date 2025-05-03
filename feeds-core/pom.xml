@@ -11,6 +11,7 @@
 
     <artifactId>feeds-core</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>core-exception</module>
         <module>core-utils</module>
