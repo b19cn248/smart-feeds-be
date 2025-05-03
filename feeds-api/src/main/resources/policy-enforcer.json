@@ -1,0 +1,28 @@
+{
+  "realm": "OpenLearnHub",
+  "auth-server-url": "https://keycloak.openlearnhub.io.vn/",
+  "resource": "open-learn-hub",
+  "credentials": {
+    "secret": "RSytCO0s3kqV2EHLyZD0Yc7BbGfDpxpb"
+  },
+  "enforcement-mode": "PERMISSIVE",
+  "http-method-as-scope": "true",
+  "paths": [
+    {
+      "path": "/swagger-ui/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/v3/api-docs/*",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/api/v1/scopes",
+      "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/api/v1/users/email/{email}",
+      "enforcement-mode": "DISABLED"
+    }
+  ]
+}

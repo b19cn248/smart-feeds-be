@@ -1,1 +1,18 @@
-spring.application.name=feeds-api
+spring:
+  application:
+    name: news-api
+  profiles:
+    active: ${PROFILE_ACTIVE:dev}
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 50MB
+      max-request-size: 500MB
+
+server:
+  port: ${PORT_INTERNAL:8888}
+
+logging:
+  level:
+    sql: debug
