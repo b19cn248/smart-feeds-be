@@ -75,6 +75,22 @@ public class NewsExceptionAdvice {
                 .body(getError(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), errors));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseGeneral<Error>> handleGeneralException(
+            Exception ex,
+            WebRequest webRequest
+    ) {
+        log.error("Unhandled exception occurred", ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(getError(
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "com.olh.feeds.internal.server.error",
+                        webRequest.getLocale(),
+                        null
+                ));
+    }
+
     private ResponseGeneral<Error> getError(int status, String code, String language) {
         return ResponseGeneral.of(
                 status,

@@ -20,6 +20,10 @@
             <groupId>com.olh.feeds</groupId>
             <artifactId>feeds-dao</artifactId>
         </dependency>
+       <dependency>
+           <groupId>com.olh.feeds</groupId>
+           <artifactId>core-exception</artifactId>
+       </dependency>
    </dependencies>
 
 </project>

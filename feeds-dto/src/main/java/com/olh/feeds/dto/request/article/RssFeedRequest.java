@@ -1,4 +1,5 @@
-package com.olh.feeds.dto.response.article;
+// RssFeedRequest.java
+package com.olh.feeds.dto.request.article;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -7,19 +8,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Builder
-public class ArticleResponse {
+public class RssFeedRequest {
 
-    private Long id;
-    private String title;
-    private String content;
-    private LocalDateTime publishDate;
-    private String summary;
-    private String event;
+    @NotEmpty(message = "{rss.feed.items.required}")
+    @Valid
+    private List<RssItemRequest> items;
 }

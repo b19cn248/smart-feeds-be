@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:latest
+    container_name: smart-feeds-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: smart_feed
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "33061:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d  # For custom initialization scripts
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smart-feeds-network
+
+  # Smart Feeds API
+  feeds-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: smart-feeds-api
+    restart: unless-stopped
+    ports:
+      - "8688:8888"
+    environment:
+      # Spring profiles
+      SPRING_PROFILES_ACTIVE: dev
+
+      # Database configuration
+      DATASOURCE_URL: jdbc:mysql://mysql:3306/smart_feed?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DATASOURCE_USERNAME: root
+      DATASOURCE_PASSWORD: root
+
+      # Redis configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Mail configuration (adjust as needed)
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: your_email@gmail.com
+      MAIL_PASSWORD: your_app_password
+      MAIL_SMTP_AUTH: "true"
+      MAIL_STARTTLS_ENABLE: "true"
+      MAIL_SSL_TRUST: smtp.gmail.com
+
+      # JVM options
+      JAVA_OPTS: "-Xms512m -Xmx1024m -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - smart-feeds-network
+    volumes:
+      - ./logs:/app/logs  # For application logs
+
+networks:
+  smart-feeds-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
