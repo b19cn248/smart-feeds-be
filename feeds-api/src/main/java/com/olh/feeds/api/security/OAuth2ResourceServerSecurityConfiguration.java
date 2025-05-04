@@ -21,6 +21,7 @@ import org.springframework.web.filter.CorsFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -53,6 +54,7 @@ public class OAuth2ResourceServerSecurityConfiguration {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3001", "https://keycloak-vuejs-git-master-hieuptits-projects.vercel.app"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         source.registerCorsConfiguration("/**", config);
