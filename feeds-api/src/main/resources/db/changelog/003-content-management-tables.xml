@@ -83,10 +83,22 @@
             <column name="title" type="varchar(512)">
                 <constraints nullable="false"/>
             </column>
+            <column name="creator" type="varchar(255)"/>
+            <column name="link" type="varchar(1024)"/>
+            <column name="guid" type="varchar(1024)"/>
+            <column name="pub_date" type="timestamp"/>
             <column name="content" type="text"/>
-            <column name="publish_date" type="date"/>
-            <column name="summary" type="text"/>
+            <column name="content_snippet" type="text"/>
+            <column name="content_encoded" type="text"/>
+            <column name="content_encoded_snippet" type="text"/>
+            <column name="enclosure_url" type="varchar(1024)"/>
+            <column name="enclosure_length" type="varchar(50)"/>
+            <column name="enclosure_type" type="varchar(100)"/>
+            <column name="dc_creator" type="varchar(255)"/>
+            <column name="iso_date" type="timestamp"/>
+            <column name="itunes_data" type="text"/>
             <column name="event" type="varchar(255)"/>
+            <column name="summary" type="text"/>
             <column name="source_id" type="bigint">
                 <constraints foreignKeyName="fk_articles_sources" references="sources(id)"/>
             </column>
