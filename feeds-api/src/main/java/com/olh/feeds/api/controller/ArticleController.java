@@ -2,6 +2,7 @@ package com.olh.feeds.api.controller;
 
 import com.olh.feeds.core.exception.response.ResponseGeneral;
 import com.olh.feeds.dto.request.article.RssFeedRequest;
+import com.olh.feeds.dto.request.article.RssItemRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.ArticleResponse;
 import com.olh.feeds.service.ArticleService;
@@ -39,11 +40,15 @@ public class ArticleController {
 
     @PostMapping("/rss-feed")
     public ResponseGeneral<List<ArticleResponse>> processRssFeed(
-            @Validated @RequestBody RssFeedRequest request
+            @Validated @RequestBody List<RssItemRequest> items
     ) {
-        log.info("Received RSS feed request with {} items", request.getItems().size());
+        log.info("Received RSS feed request with {} items", items.size());
 
-        List<ArticleResponse> savedArticles = rssFeedService.processRssFeed(request);
+        List<ArticleResponse> savedArticles = rssFeedService.processRssFeed(
+                RssFeedRequest.builder()
+                        .items(items)
+                        .build()
+        );
 
         return ResponseGeneral.of(
                 HttpStatus.CREATED.value(),
