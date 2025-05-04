@@ -22,4 +22,7 @@ public class ArticleResponse {
     private LocalDateTime publishDate;
     private String summary;
     private String event;
+    private String source;
+    private String url;
+    private String author;
 }

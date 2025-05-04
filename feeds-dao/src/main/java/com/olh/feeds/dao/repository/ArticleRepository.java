@@ -15,7 +15,8 @@ import java.util.Optional;
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-            "(a.id, a.title, a.content, a.isoDate, a.summary, a.event) from Article a")
+            "(a.id, a.title, a.content, a.isoDate, a.summary, a.event, s.url, a.link, a.creator) " +
+            "from Article a join Source s on a.sourceId = s.id ")
     Page<ArticleResponse> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Optional<Article> findByGuid(String guid);
