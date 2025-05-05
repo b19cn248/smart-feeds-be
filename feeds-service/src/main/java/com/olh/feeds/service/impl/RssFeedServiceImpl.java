@@ -21,10 +21,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,31 +43,18 @@ public class RssFeedServiceImpl implements RssFeedService {
             throw new BadRequestException("com.olh.feeds.rss.items.empty");
         }
 
-        // Validate và kiểm tra duplicate
-        List<String> guids = request.getItems().stream()
-                .map(RssItemRequest::getGuid)
-                .filter(guid -> guid != null && !guid.isEmpty())
-                .toList();
-
-        // Lấy danh sách articles đã tồn tại
-        Map<String, Article> existingArticles = articleRepository.findByGuidIn(guids)
-                .stream()
-                .collect(Collectors.toMap(Article::getGuid, article -> article));
-
-        // Lấy danh sách articles đã tồn tại theo link
-        List<String> links = request.getItems().stream()
-                .map(RssItemRequest::getLink)
-                .filter(link -> link != null && !link.isEmpty())
-                .toList();
-
         List<Article> articlesToSave = new ArrayList<>();
         List<ArticleResponse> responses = new ArrayList<>();
 
+
         for (RssItemRequest item : request.getItems()) {
+
             try {
+
+                Optional<Article> articleInDB = articleRepository.findByGuidOrLink(item.getGuid(), item.getLink());
                 // Skip nếu đã tồn tại
-                if (existingArticles.containsKey(item.getGuid()) || links.contains(item.getLink())) {
-                    log.info("Article with guid {} already exists, skipping", item.getGuid());
+                if (articleInDB.isPresent()) {
+                    log.info("Article already exists, skipping");
                     continue;
                 }
 

@@ -7,9 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
@@ -19,11 +17,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "from Article a join Source s on a.sourceId = s.id ")
     Page<ArticleResponse> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    Optional<Article> findByGuid(String guid);
-
-    @Query("SELECT a FROM Article a WHERE a.guid IN :guids")
-    List<Article> findByGuidIn(@Param("guids") List<String> guids);
-
-    @Query("SELECT a FROM Article a WHERE a.link IN :links")
-    List<Article> findByLinkIn(@Param("links") List<String> links);
+    Optional<Article> findByGuidOrLink(String guid, String link);
 }
