@@ -121,13 +121,16 @@ public class RssFeedServiceImpl implements RssFeedService {
     }
 
     private Article createArticleFromRequest(RssItemRequest request, Long sourceId) {
+
+        String enclosureUrl = this.extraImageFromContent(request.getContent());
+
         Article article = Article.builder()
                 .title(request.getTitle())
                 .creator(request.getCreator())
                 .link(request.getLink())
                 .guid(request.getGuid())
                 .content(request.getContent())
-                .enclosureUrl(this.extraImageFromContent(request.getContent()))
+                .enclosureUrl(enclosureUrl)
                 .contentSnippet(request.getContentSnippet())
                 .contentEncoded(request.getContentEncoded())
                 .contentEncodedSnippet(request.getContentEncodedSnippet())
@@ -193,14 +196,14 @@ public class RssFeedServiceImpl implements RssFeedService {
     }
 
     private String extraImageFromContent(String content) {
-        Pattern pattern = Pattern.compile("img\\s+src=['\"]([^'\"]+)['\"]");
+        String imgPattern = "src=''(.*?)''";
+        Pattern pattern = Pattern.compile(imgPattern);
         Matcher matcher = pattern.matcher(content);
 
         if (matcher.find()) {
             return matcher.group(1);
-        } else {
-            log.warn("No image URL found in content");
-            return null;
         }
+
+        return "";
     }
 }
