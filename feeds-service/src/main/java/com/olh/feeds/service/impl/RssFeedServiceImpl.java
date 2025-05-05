@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -114,7 +115,7 @@ public class RssFeedServiceImpl implements RssFeedService {
 
     private Article createArticleFromRequest(RssItemRequest request, Long sourceId) {
 
-        String enclosureUrl = this.extraImageFromContent(request.getContent());
+        String enclosureUrl = this.extractImageFromContent(request.getContent());
 
         Article article = Article.builder()
                 .title(request.getTitle())
@@ -187,15 +188,124 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .build();
     }
 
-    private String extraImageFromContent(String content) {
-        String imgPattern = "src=''(.*?)''";
-        Pattern pattern = Pattern.compile(imgPattern);
-        Matcher matcher = pattern.matcher(content);
+    /**
+     * Extracts image URL from content with different HTML patterns
+     * Handles various quotation styles and HTML structures
+     * @param content The HTML content string
+     * @return The extracted image URL or empty string if not found
+     */
+    private String extractImageFromContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return "";
+        }
 
-        if (matcher.find()) {
-            return matcher.group(1);
+        // List of patterns to try
+        List<String> patterns = Arrays.asList(
+                // Single quotes without space
+                "src=''(.*?)''",
+                // Double quotes without space
+                "src=\"(.*?)\"",
+                // Single quotes with space
+                "src = ''(.*?)''",
+                // Double quotes with space
+                "src = \"(.*?)\"",
+                // HTML encoded quotes
+                "src=&quot;(.*?)&quot;",
+                // Data-src attribute (for lazy loading)
+                "data-src=\"(.*?)\"",
+                // Data-src with single quotes
+                "data-src=''(.*?)''",
+                // Image tag with srcset
+                "srcset=\"(.*?)(?:\\s|\")",
+                // Base64 encoded images
+                "src=\"data:image.*?;base64,(.*?)\"",
+                // For URLs without quotes (rare but possible)
+                "src=(https?://[^\\s>]+)"
+        );
+
+        // Try each pattern
+        for (String patternStr : patterns) {
+            Pattern pattern = Pattern.compile(patternStr);
+            Matcher matcher = pattern.matcher(content);
+
+            if (matcher.find()) {
+                String url = matcher.group(1);
+
+                // Clean the URL (remove extra spaces, quotes, etc.)
+                url = url.trim();
+
+                // Validate if it's a proper URL
+                if (isValidImageUrl(url)) {
+                    return url;
+                }
+            }
+        }
+
+        // If no pattern matched or URL wasn't valid, try a more aggressive approach
+        // Look for an image tag and extract everything between opening and closing tags
+        Pattern imgTagPattern = Pattern.compile("<img[^>]+>");
+        Matcher imgTagMatcher = imgTagPattern.matcher(content);
+
+        if (imgTagMatcher.find()) {
+            String imgTag = imgTagMatcher.group(0);
+
+            // Try all patterns again but just on the img tag
+            for (String patternStr : patterns) {
+                Pattern pattern = Pattern.compile(patternStr);
+                Matcher matcher = pattern.matcher(imgTag);
+
+                if (matcher.find()) {
+                    String url = matcher.group(1);
+                    url = url.trim();
+
+                    if (isValidImageUrl(url)) {
+                        return url;
+                    }
+                }
+            }
         }
 
         return "";
+    }
+
+    /**
+     * Validates if the URL is likely a valid image URL
+     * @param url The URL to validate
+     * @return true if it's a valid image URL, false otherwise
+     */
+    private boolean isValidImageUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+
+        // Check if it starts with http:// or https:// or data:image
+        if (!(url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:image"))) {
+            return false;
+        }
+
+        // If it's a data URL, it's valid
+        if (url.startsWith("data:image")) {
+            return true;
+        }
+
+        // Check if it ends with common image extensions
+        // This is optional but adds an extra validation layer
+        String[] imageExtensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"};
+        String lowerUrl = url.toLowerCase();
+
+        // Skip extension check if URL contains query parameters
+        if (url.contains("?")) {
+            return true;
+        }
+
+        for (String ext : imageExtensions) {
+            if (lowerUrl.endsWith(ext)) {
+                return true;
+            }
+        }
+
+        // If URL doesn't end with a common image extension but starts with http/https,
+        // still consider it valid as it might be a dynamic image URL
+        return true;
     }
 }
