@@ -22,6 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -125,6 +127,7 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .link(request.getLink())
                 .guid(request.getGuid())
                 .content(request.getContent())
+                .enclosureUrl(this.extraImageFromContent(request.getContent()))
                 .contentSnippet(request.getContentSnippet())
                 .contentEncoded(request.getContentEncoded())
                 .contentEncodedSnippet(request.getContentEncodedSnippet())
@@ -187,5 +190,17 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .summary(article.getSummary())
                 .event(article.getEvent())
                 .build();
+    }
+
+    private String extraImageFromContent(String content) {
+        Pattern pattern = Pattern.compile("img\\s+src=['\"]([^'\"]+)['\"]");
+        Matcher matcher = pattern.matcher(content);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            log.warn("No image URL found in content");
+            return null;
+        }
     }
 }
