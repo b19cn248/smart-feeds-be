@@ -55,13 +55,19 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .stream()
                 .collect(Collectors.toMap(Article::getGuid, article -> article));
 
+        // Lấy danh sách articles đã tồn tại theo link
+        List<String> links = request.getItems().stream()
+                .map(RssItemRequest::getLink)
+                .filter(link -> link != null && !link.isEmpty())
+                .toList();
+
         List<Article> articlesToSave = new ArrayList<>();
         List<ArticleResponse> responses = new ArrayList<>();
 
         for (RssItemRequest item : request.getItems()) {
             try {
                 // Skip nếu đã tồn tại
-                if (existingArticles.containsKey(item.getGuid())) {
+                if (existingArticles.containsKey(item.getGuid()) || links.contains(item.getLink())) {
                     log.info("Article with guid {} already exists, skipping", item.getGuid());
                     continue;
                 }

@@ -25,4 +25,5 @@ public class ArticleResponse {
     private String source;
     private String url;
     private String author;
+    private String imageUrl;
 }
