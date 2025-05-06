@@ -37,7 +37,8 @@ public class OAuth2ResourceServerSecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
+                                "/api/v1/articles/rss-feed").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())

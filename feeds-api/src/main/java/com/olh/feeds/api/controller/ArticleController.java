@@ -5,6 +5,7 @@ import com.olh.feeds.dto.request.article.RssFeedRequest;
 import com.olh.feeds.dto.request.article.RssItemRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.ArticleResponse;
+import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.service.ArticleService;
 import com.olh.feeds.service.RssFeedService;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,36 @@ public class ArticleController {
     private final ArticleService articleService;
     private final RssFeedService rssFeedService;
 
+    /**
+     * Lấy danh sách articles theo sources mà người dùng đang theo dõi
+     * @param pageable Thông tin phân trang
+     * @return Danh sách articles theo sources
+     */
     @GetMapping
-    public ResponseGeneral<PageResponse<ArticleResponse>> getAllArticles(
+    public ResponseGeneral<PageResponse<SourceArticlesResponse>> getAllArticles(
             @PageableDefault Pageable pageable
     ) {
-
+        log.info("REST request to get articles by user's sources");
         return ResponseGeneral.of(
                 HttpStatus.OK.value(),
-                "Success",
+                "articles.list.success",
+                articleService.getArticlesByUserSources(pageable)
+        );
+    }
+
+    /**
+     * Lấy tất cả articles (API cũ, giữ lại để tương thích)
+     * @param pageable Thông tin phân trang
+     * @return Danh sách articles
+     */
+    @GetMapping("/all")
+    public ResponseGeneral<PageResponse<ArticleResponse>> getAllArticlesLegacy(
+            @PageableDefault Pageable pageable
+    ) {
+        log.info("REST request to get all articles (legacy API)");
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "articles.list.success",
                 articleService.getAllArticles(pageable)
         );
     }

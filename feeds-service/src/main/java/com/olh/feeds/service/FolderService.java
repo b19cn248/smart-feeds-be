@@ -1,4 +1,3 @@
-// feeds-service/src/main/java/com/olh/feeds/service/FolderService.java
 package com.olh.feeds.service;
 
 import com.olh.feeds.dto.request.folder.FolderRequest;
@@ -16,6 +15,13 @@ public interface FolderService {
      * @return List of folders
      */
     PageResponse<FolderResponse> getAllFolders(Long userId, Pageable pageable);
+
+    /**
+     * Get folders by current authenticated user
+     * @param pageable Pagination information
+     * @return List of folders belonging to current user
+     */
+    PageResponse<FolderResponse> getFoldersByCurrentUser(Pageable pageable);
 
     /**
      * Get folder details including sources

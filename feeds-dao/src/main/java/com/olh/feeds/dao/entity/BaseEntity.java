@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
@@ -24,6 +26,7 @@ public abstract class BaseEntity implements Serializable {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @CreatedBy
     @Column(name = "created_by", nullable = false, length = 100)
     private String createdBy;
 
@@ -31,6 +34,7 @@ public abstract class BaseEntity implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @LastModifiedBy
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
 
@@ -40,10 +44,10 @@ public abstract class BaseEntity implements Serializable {
     @PrePersist
     public void prePersist() {
         if (this.createdBy == null || this.createdBy.isEmpty()) {
-            this.createdBy = "system";  // Default value, will be replaced in a real scenario
+            this.createdBy = "system";
         }
         if (this.updatedBy == null || this.updatedBy.isEmpty()) {
-            this.updatedBy = "system";  // Default value, will be replaced in a real scenario
+            this.updatedBy = "system";
         }
     }
 }

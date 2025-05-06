@@ -1,4 +1,3 @@
-// feeds-service/src/main/java/com/olh/feeds/service/impl/FolderServiceImpl.java
 package com.olh.feeds.service.impl;
 
 import com.olh.feeds.core.exception.base.BadRequestException;
@@ -20,8 +19,10 @@ import com.olh.feeds.dto.response.source.SourceResponse;
 import com.olh.feeds.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,20 +40,30 @@ public class FolderServiceImpl implements FolderService {
     private final SourceRepository sourceRepository;
     private final FolderSourceRepository folderSourceRepository;
     private final PageMapper pageMapper;
-
-    // Giả định giá trị cố định cho user ID
-    private static final Long DEFAULT_USER_ID = 1L;
+    private final AuditorAware<String> auditorAware;
 
     @Override
     public PageResponse<FolderResponse> getAllFolders(Long userId, Pageable pageable) {
         log.info("Getting all folders for user ID: {}", userId);
 
-        // Sử dụng user ID được cung cấp hoặc mặc định
-        Long effectiveUserId = (userId != null) ? userId : DEFAULT_USER_ID;
+        // Sử dụng user ID được cung cấp hoặc mặc định nếu null
+        Long effectiveUserId = userId;
 
         Page<FolderResponse> foldersPage = folderRepository.findAllFolders(effectiveUserId, pageable);
 
         log.info("Found {} folders", foldersPage.getNumberOfElements());
+        return pageMapper.toPageDto(foldersPage);
+    }
+
+    @Override
+    public PageResponse<FolderResponse> getFoldersByCurrentUser(Pageable pageable) {
+        // Lấy username từ Security Context
+        String username = auditorAware.getCurrentAuditor().get();
+        log.info("Getting folders for current user: {}", username);
+
+        Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
+
+        log.info("Found {} folders for user {}", foldersPage.getNumberOfElements(), username);
         return pageMapper.toPageDto(foldersPage);
     }
 
@@ -106,10 +117,13 @@ public class FolderServiceImpl implements FolderService {
             throw new BadRequestException("folder.name.required");
         }
 
+        // Lấy username từ Security Context
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Folder folder = Folder.builder()
                 .name(request.getName())
                 .theme(request.getTheme())
-                .userId(DEFAULT_USER_ID) // Sử dụng user ID cố định
+                .userId(null) // Không cần thiết lập userId vì sẽ dùng createdBy từ auditing
                 .build();
 
         folder = folderRepository.save(folder);
@@ -134,6 +148,13 @@ public class FolderServiceImpl implements FolderService {
         if (folder == null) {
             log.error("Folder not found with ID: {}", folderId);
             throw new NotFoundException(folderId.toString(), "folder");
+        }
+
+        // Kiểm tra người dùng có quyền truy cập vào folder này không
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to access folder {}", username, folderId);
+            throw new BadRequestException("folder.access.denied");
         }
 
         // Kiểm tra source tồn tại

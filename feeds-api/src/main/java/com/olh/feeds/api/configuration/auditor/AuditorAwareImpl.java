@@ -30,7 +30,6 @@ public class AuditorAwareImpl implements AuditorAware<String> {
 
         if (!this.isAnonymous() && (Objects.nonNull(authentication.getPrincipal()))) {
             if (authentication.getPrincipal() instanceof Jwt jwt) {
-                // Trả về preferred_username nếu có, nếu không thì trả về subject của JWT
                 String username = jwt.getClaim(PREFERRED_USERNAME);
                 if (username == null) {
                     username = jwt.getClaim(SUB);
@@ -38,7 +37,6 @@ public class AuditorAwareImpl implements AuditorAware<String> {
                 return Optional.of(username != null ? username : SYSTEM);
             }
 
-            // Trường hợp không phải JWT, lấy thông tin từ getName()
             return Optional.of(authentication.getName());
         }
 

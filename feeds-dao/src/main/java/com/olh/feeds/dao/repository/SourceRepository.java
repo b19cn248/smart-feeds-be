@@ -1,4 +1,3 @@
-// feeds-dao/src/main/java/com/olh/feeds/dao/repository/SourceRepository.java
 package com.olh.feeds.dao.repository;
 
 import com.olh.feeds.dao.entity.Source;
@@ -27,4 +26,12 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
     Page<SourceResponse> findAllSources(
             @Param("active") Boolean active,
             Pageable pageable);
+
+    @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(" +
+            "s.id, s.url, s.language, s.type, s.accountId, s.hashtag, s.category, " +
+            "s.userId, s.active, s.createdAt) " +
+            "FROM Source s " +
+            "WHERE s.id = :sourceId " +
+            "AND s.isDeleted = false")
+    SourceResponse findSourceById(@Param("sourceId") Long sourceId);
 }

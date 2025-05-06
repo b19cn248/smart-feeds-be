@@ -1,4 +1,3 @@
-// feeds-api/src/main/java/com/olh/feeds/api/controller/FolderController.java
 package com.olh.feeds.api.controller;
 
 import com.olh.feeds.core.exception.response.ResponseGeneral;
@@ -25,12 +24,31 @@ public class FolderController {
     private final FolderService folderService;
 
     /**
-     * Get all folders with pagination
-     * @param userId Optional user ID filter
-     * @param pageable Pagination information
-     * @return List of folders
+     * Lấy danh sách folders của người dùng hiện tại
+     * @param pageable Thông tin phân trang
+     * @return Danh sách folders
      */
     @GetMapping
+    public ResponseGeneral<PageResponse<FolderResponse>> getCurrentUserFolders(
+            @PageableDefault Pageable pageable
+    ) {
+        log.info("REST request to get folders for current user");
+
+        PageResponse<FolderResponse> folders = folderService.getFoldersByCurrentUser(pageable);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "folder.list.success",
+                folders
+        );
+    }
+
+    /**
+     * API cũ - Lấy tất cả folders với filter userId (giữ lại để tương thích)
+     * @param userId Optional user ID filter
+     * @param pageable Thông tin phân trang
+     * @return Danh sách folders
+     */
+    @GetMapping("/all")
     public ResponseGeneral<PageResponse<FolderResponse>> getAllFolders(
             @RequestParam(name = "userId", required = false) Long userId,
             @PageableDefault Pageable pageable
@@ -46,9 +64,9 @@ public class FolderController {
     }
 
     /**
-     * Get folder details including sources
+     * Lấy chi tiết folder bao gồm danh sách sources
      * @param id Folder ID
-     * @return Folder with sources
+     * @return Folder với danh sách sources
      */
     @GetMapping("/{id}")
     public ResponseGeneral<FolderDetailResponse> getFolderDetail(
@@ -65,7 +83,7 @@ public class FolderController {
     }
 
     /**
-     * Create a new folder
+     * Tạo folder mới
      * @param request Folder creation request
      * @return Created folder
      */
@@ -84,10 +102,10 @@ public class FolderController {
     }
 
     /**
-     * Add a source to a folder
+     * Thêm source vào folder
      * @param id Folder ID
      * @param request Source to add
-     * @return Updated folder details
+     * @return Thông tin folder đã cập nhật
      */
     @PostMapping("/{id}/sources")
     public ResponseGeneral<FolderDetailResponse> addSourceToFolder(
