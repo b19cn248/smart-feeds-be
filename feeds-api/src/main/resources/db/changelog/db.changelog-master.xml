@@ -23,4 +23,7 @@
     <!-- Technical Feature Tables -->
     <include file="classpath:db/changelog/006-technical-feature-tables.xml"/>
 
+    <!-- Add missing columns to folder_sources table -->
+    <include file="classpath:db/changelog/007-add-missing-columns.xml"/>
+
 </databaseChangeLog>

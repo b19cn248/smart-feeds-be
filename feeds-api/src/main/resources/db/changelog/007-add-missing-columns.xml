@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="007-add-missing-columns-to-folder-sources" author="smartfeed-developer">
+        <comment>Add missing updated_at and updated_by columns to folder_sources table</comment>
+
+        <addColumn tableName="folder_sources">
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Set initial values for existing rows -->
+        <sql>
+            UPDATE folder_sources
+            SET updated_at = created_at,
+                updated_by = created_by
+            WHERE updated_by IS NULL;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
