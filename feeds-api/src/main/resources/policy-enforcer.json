@@ -19,10 +19,6 @@
     {
       "path": "/api/v1/scopes",
       "enforcement-mode": "DISABLED"
-    },
-    {
-      "path": "/api/v1/*",
-      "enforcement-mode": "DISABLED"
     }
   ]
 }
