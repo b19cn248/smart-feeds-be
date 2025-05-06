@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,7 +117,7 @@ public class FolderServiceImpl implements FolderService {
         }
 
         // Lấy username từ Security Context
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = auditorAware.getCurrentAuditor().get();
 
         Folder folder = Folder.builder()
                 .name(request.getName())
@@ -151,7 +150,7 @@ public class FolderServiceImpl implements FolderService {
         }
 
         // Kiểm tra người dùng có quyền truy cập vào folder này không
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = auditorAware.getCurrentAuditor().get();
         if (!folder.getCreatedBy().equals(username)) {
             log.error("User {} does not have permission to access folder {}", username, folderId);
             throw new BadRequestException("folder.access.denied");

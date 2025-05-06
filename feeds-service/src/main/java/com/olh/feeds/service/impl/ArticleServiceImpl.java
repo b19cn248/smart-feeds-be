@@ -10,16 +10,15 @@ import com.olh.feeds.dto.response.source.SourceResponse;
 import com.olh.feeds.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,6 +28,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final SourceRepository sourceRepository;
     private final PageMapper pageMapper;
+    private final AuditorAware<String> auditorAware;
 
     @Override
     public PageResponse<ArticleResponse> getAllArticles(Pageable pageable) {
@@ -44,7 +44,7 @@ public class ArticleServiceImpl implements ArticleService {
         log.info("getArticlesByUserSources");
 
         // Lấy username từ Security Context
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = auditorAware.getCurrentAuditor().get();
         log.info("Current username: {}", username);
 
         // Lấy danh sách source IDs mà user đang follow (qua folders)
