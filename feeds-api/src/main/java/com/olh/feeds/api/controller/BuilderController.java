@@ -13,7 +13,7 @@ public class BuilderController {
     public String healthCheck() {
         try {
             // Đảm bảo file script có quyền thực thi (chmod +x your_script.sh)
-            Process process = Runtime.getRuntime().exec("bash /đường/dẫn/đến/your_script.sh");
+            Process process = Runtime.getRuntime().exec("bash /home/linh2307_hmu/smart-feeds-be/run.sh");
 
             // Đợi script hoàn thành
             int exitCode = process.waitFor();
