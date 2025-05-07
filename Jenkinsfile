@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'smart-feeds-api'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
-        TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
+        TELEGRAM_CHAT_ID = '-4754148533'
         TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
     }
 
@@ -15,9 +15,29 @@ pipeline {
             }
         }
 
+        stage('Setup Maven') {
+            steps {
+                script {
+                    def mvnHome = tool name: 'Maven', type: 'maven'
+                    env.PATH = "${mvnHome}/bin:${env.PATH}"
+
+                    // Kiểm tra cài đặt Maven
+                    sh 'mvn --version || (apt-get update && apt-get install -y maven)'
+                }
+            }
+        }
+
         stage('Build Maven') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh '''
+                # Sử dụng Maven Wrapper nếu có
+                if [ -f "./mvnw" ]; then
+                    chmod +x ./mvnw
+                    ./mvnw clean package -DskipTests
+                else
+                    mvn clean package -DskipTests
+                fi
+                '''
             }
         }
 
@@ -41,7 +61,7 @@ pipeline {
             script {
                 sh """
                 curl -s -X POST https://api.telegram.org/bot\${TELEGRAM_BOT_TOKEN}/sendMessage \
-                -d chat_id=\${TELEGRAM_CHAT_ID} \
+                -d chat_id=${TELEGRAM_CHAT_ID} \
                 -d parse_mode="HTML" \
                 -d text="✅ <b>Build Thành Công!</b> \n<b>Dự án:</b> Smart Feeds API \n<b>Nhánh:</b> ${env.GIT_BRANCH} \n<b>Số Build:</b> ${env.BUILD_NUMBER} \n<b>URL Build:</b> ${env.BUILD_URL}"
                 """
@@ -51,7 +71,7 @@ pipeline {
             script {
                 sh """
                 curl -s -X POST https://api.telegram.org/bot\${TELEGRAM_BOT_TOKEN}/sendMessage \
-                -d chat_id=\${TELEGRAM_CHAT_ID} \
+                -d chat_id=${TELEGRAM_CHAT_ID} \
                 -d parse_mode="HTML" \
                 -d text="❌ <b>Build Thất Bại!</b> \n<b>Dự án:</b> Smart Feeds API \n<b>Nhánh:</b> ${env.GIT_BRANCH} \n<b>Số Build:</b> ${env.BUILD_NUMBER} \n<b>URL Build:</b> ${env.BUILD_URL}"
                 """
