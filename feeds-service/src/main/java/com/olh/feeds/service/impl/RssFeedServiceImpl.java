@@ -133,7 +133,7 @@ public class RssFeedServiceImpl implements RssFeedService {
 
         // Parse dates
         if (request.getPubDate() != null) {
-            article.setPubDate(parseDateTime(request.getPubDate()));
+            article.setPubDate(DateTimeUtils.parseRFC822DateSafely(request.getPubDate()));
         }
         if (request.getIsoDate() != null) {
             article.setIsoDate(parseIsoDateTime(request.getIsoDate()));
