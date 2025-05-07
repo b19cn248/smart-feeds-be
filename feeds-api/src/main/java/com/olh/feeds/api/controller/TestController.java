@@ -13,9 +13,4 @@ public class TestController {
         return "Server is running";
     }
 
-    // Test API to check if the application is up and running
-    @RequestMapping("/status")
-    public String statusCheck() {
-        return "Application is up and running";
-    }
 }
