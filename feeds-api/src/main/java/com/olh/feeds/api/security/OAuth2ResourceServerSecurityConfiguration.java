@@ -55,7 +55,9 @@ public class OAuth2ResourceServerSecurityConfiguration {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3007", "https://smart.feeds.openlearnhub.io.vn/"));
+        config.setAllowedOrigins(List.of("http://localhost:3007",
+                "https://smart.feeds.gcp.openlearnhub.io.vn/",
+                "https://smart.feeds.openlearnhub.io.vn/"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         source.registerCorsConfiguration("/**", config);
