@@ -1,5 +1,6 @@
 package com.olh.feeds.api.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,5 +18,12 @@ public class TestController {
     @RequestMapping("/status")
     public String statusCheck() {
         return "Application is up and running";
+    }
+
+    // Test API to check if the database connection is working
+    @GetMapping("/db")
+    public String dbCheck() {
+        // Here you can add logic to check the database connection
+        return "Database connection is working";
     }
 }
