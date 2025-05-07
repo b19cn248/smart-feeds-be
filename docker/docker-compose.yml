@@ -26,6 +26,7 @@ services:
 
   # Smart Feeds API
   feeds-api:
+    image: smart-feeds-api:${DOCKER_TAG:-latest}
     build:
       context: ..
       dockerfile: docker/Dockerfile
