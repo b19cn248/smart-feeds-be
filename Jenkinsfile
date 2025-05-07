@@ -15,21 +15,15 @@ pipeline {
             }
         }
 
-        stage('Setup Maven') {
-            steps {
-                script {
-                    def mvnHome = tool name: 'Maven', type: 'maven'
-                    env.PATH = "${mvnHome}/bin:${env.PATH}"
-
-                    // Kiểm tra cài đặt Maven
-                    sh 'mvn --version || (apt-get update && apt-get install -y maven)'
-                }
-            }
-        }
-
         stage('Build Maven') {
             steps {
                 sh '''
+                # Kiểm tra Maven có tồn tại không
+                if ! command -v mvn &> /dev/null; then
+                    echo "Maven không được cài đặt. Đang cài đặt..."
+                    apt-get update && apt-get install -y maven || true
+                fi
+
                 # Sử dụng Maven Wrapper nếu có
                 if [ -f "./mvnw" ]; then
                     chmod +x ./mvnw
@@ -54,6 +48,30 @@ pipeline {
                 sh "DOCKER_TAG=${DOCKER_TAG} docker-compose -f docker/docker-compose.yml up -d"
             }
         }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                # Đợi ứng dụng khởi động
+                echo "Đợi ứng dụng khởi động..."
+                sleep 30
+
+                # Kiểm tra trạng thái của container
+                CONTAINER_STATUS=$(docker ps -a --filter "name=smart-feeds-api" --format "{{.Status}}")
+                echo "Trạng thái container: $CONTAINER_STATUS"
+
+                # Kiểm tra API có phản hồi không
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8688/actuator/health || echo "000")
+
+                if [[ $HTTP_CODE == "200" ]]; then
+                    echo "Ứng dụng đã triển khai thành công. API phản hồi với mã HTTP: $HTTP_CODE"
+                else
+                    echo "Kiểm tra sức khỏe thất bại. API phản hồi với mã HTTP: $HTTP_CODE"
+                    # Chú ý: không exit 1 ở đây để tránh làm pipeline thất bại nếu endpoint health không có
+                fi
+                '''
+            }
+        }
     }
 
     post {
@@ -76,6 +94,10 @@ pipeline {
                 -d text="❌ <b>Build Thất Bại!</b> \n<b>Dự án:</b> Smart Feeds API \n<b>Nhánh:</b> ${env.GIT_BRANCH} \n<b>Số Build:</b> ${env.BUILD_NUMBER} \n<b>URL Build:</b> ${env.BUILD_URL}"
                 """
             }
+        }
+        always {
+            // Dọn dẹp workspace sau khi hoàn thành
+            cleanWs()
         }
     }
 }
