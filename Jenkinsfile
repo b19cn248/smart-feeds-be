@@ -16,21 +16,16 @@ pipeline {
         }
 
         stage('Build Maven') {
+            agent {
+                docker {
+                    image 'maven:3.9.9-eclipse-temurin-21-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
-                # Kiểm tra Maven có tồn tại không
-                if ! command -v mvn &> /dev/null; then
-                    echo "Maven không được cài đặt. Đang cài đặt..."
-                    apt-get update && apt-get install -y maven || true
-                fi
-
-                # Sử dụng Maven Wrapper nếu có
-                if [ -f "./mvnw" ]; then
-                    chmod +x ./mvnw
-                    ./mvnw clean package -DskipTests
-                else
-                    mvn clean package -DskipTests
-                fi
+                echo "Sử dụng Maven Docker image để build"
+                mvn clean package -DskipTests
                 '''
             }
         }
@@ -67,7 +62,6 @@ pipeline {
                     echo "Ứng dụng đã triển khai thành công. API phản hồi với mã HTTP: $HTTP_CODE"
                 else
                     echo "Kiểm tra sức khỏe thất bại. API phản hồi với mã HTTP: $HTTP_CODE"
-                    # Chú ý: không exit 1 ở đây để tránh làm pipeline thất bại nếu endpoint health không có
                 fi
                 '''
             }
@@ -96,7 +90,6 @@ pipeline {
             }
         }
         always {
-            // Dọn dẹp workspace sau khi hoàn thành
             cleanWs()
         }
     }
