@@ -122,7 +122,7 @@ public class FolderController {
         );
     }
 
-    @GetMapping(""/test")
+    @GetMapping("/test")
     public String getAllFolders() {
         return "Hello World";
     }
