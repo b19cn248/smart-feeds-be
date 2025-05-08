@@ -2,20 +2,19 @@ pipeline {
     agent any
 
     environment {
+        // Định nghĩa các biến môi trường
         TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
         TELEGRAM_CHAT_ID = credentials('telegram-chat-id')
     }
 
     stages {
-        stage('Manual Checkout') {
+        stage('Checkout') {
             steps {
-                // Thực hiện clone thủ công
-                sh '''
-                    rm -rf ./*
-                    git clone https://github.com/b19cn248/smart-feeds-be.git .
-                    git checkout develop
-                '''
+                // Dọn dẹp trước khi checkout
+                cleanWs()
+                checkout scm
 
+                // Gửi thông báo - build bắt đầu
                 sh '''
                     curl -s -X POST https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \
                     -d chat_id=${TELEGRAM_CHAT_ID} \
@@ -27,6 +26,7 @@ pipeline {
 
         stage('Build and Deploy') {
             steps {
+                // Di chuyển đến thư mục docker và rebuild các container
                 sh '''
                     cd docker
                     docker compose down
@@ -38,6 +38,7 @@ pipeline {
 
     post {
         success {
+            // Gửi thông báo thành công
             sh '''
                 curl -s -X POST https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \
                 -d chat_id=${TELEGRAM_CHAT_ID} \
@@ -46,6 +47,7 @@ pipeline {
             '''
         }
         failure {
+            // Gửi thông báo thất bại
             sh '''
                 curl -s -X POST https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \
                 -d chat_id=${TELEGRAM_CHAT_ID} \
