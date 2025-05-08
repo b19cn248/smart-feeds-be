@@ -25,7 +25,7 @@
       "enforcement-mode": "DISABLED"
     },
     {
-      "path": "/api/v1/build",
+      "path": "/api/v1/build/*",
       "enforcement-mode": "DISABLED"
     }
   ]
