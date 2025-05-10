@@ -188,6 +188,7 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .url(article.getLink())
                 .summary(article.getSummary())
                 .event(article.getEvent())
+                .imageUrl(article.getEnclosureUrl())
                 .build();
     }
 
