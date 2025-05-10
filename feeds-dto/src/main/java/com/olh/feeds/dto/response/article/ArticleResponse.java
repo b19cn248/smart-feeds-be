@@ -19,6 +19,7 @@ public class ArticleResponse {
     private Long id;
     private String title;
     private String content;
+    private String contentEncoded;
     private LocalDateTime publishDate;
     private String summary;
     private String event;
@@ -26,4 +27,5 @@ public class ArticleResponse {
     private String url;
     private String author;
     private String imageUrl;
+    private String contentSnippet;
 }

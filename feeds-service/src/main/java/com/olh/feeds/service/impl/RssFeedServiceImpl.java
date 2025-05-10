@@ -182,7 +182,10 @@ public class RssFeedServiceImpl implements RssFeedService {
                 .id(article.getId())
                 .title(article.getTitle())
                 .content(article.getContent())
+                .contentEncoded(article.getContentEncoded())
                 .publishDate(article.getPubDate() != null ? article.getPubDate() : null)
+                .content(article.getContentSnippet())
+                .url(article.getLink())
                 .summary(article.getSummary())
                 .event(article.getEvent())
                 .build();
@@ -191,6 +194,7 @@ public class RssFeedServiceImpl implements RssFeedService {
     /**
      * Extracts image URL from content with different HTML patterns
      * Handles various quotation styles and HTML structures
+     *
      * @param content The HTML content string
      * @return The extracted image URL or empty string if not found
      */
@@ -270,6 +274,7 @@ public class RssFeedServiceImpl implements RssFeedService {
 
     /**
      * Validates if the URL is likely a valid image URL
+     *
      * @param url The URL to validate
      * @return true if it's a valid image URL, false otherwise
      */
