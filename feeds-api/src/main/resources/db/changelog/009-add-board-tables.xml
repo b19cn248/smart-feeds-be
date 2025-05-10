@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="009-create-boards-table" author="smartfeed-developer">
+        <comment>Create boards table for saving collections of articles</comment>
+        <createTable tableName="boards">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(512)"/>
+            <column name="color" type="varchar(50)"/>
+            <column name="icon" type="varchar(50)"/>
+            <column name="is_public" type="boolean" defaultValueBoolean="false"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="009-create-board-articles-table" author="smartfeed-developer">
+        <comment>Create board_articles junction table</comment>
+        <createTable tableName="board_articles">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="board_id" type="bigint">
+                <constraints foreignKeyName="fk_board_articles_boards" references="boards(id)"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_board_articles_articles" references="articles(id)"/>
+            </column>
+            <column name="note" type="varchar(512)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="board_articles"
+                             columnNames="board_id, article_id"
+                             constraintName="uk_board_articles"/>
+    </changeSet>
+</databaseChangeLog>

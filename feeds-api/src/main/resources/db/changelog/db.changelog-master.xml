@@ -29,4 +29,7 @@
     <!-- Insert prerequisite data -->
     <include file="classpath:db/changelog/008-insert-prerequisite-data.xml"/>
 
+    <!-- Add board management tables -->
+    <include file="classpath:db/changelog/009-add-board-tables.xml"/>
+
 </databaseChangeLog>
