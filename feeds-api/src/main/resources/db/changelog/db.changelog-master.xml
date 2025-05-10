@@ -26,4 +26,7 @@
     <!-- Add missing columns to folder_sources table -->
     <include file="classpath:db/changelog/007-add-missing-columns.xml"/>
 
+    <!-- Insert prerequisite data -->
+    <include file="classpath:db/changelog/008-insert-prerequisite-data.xml"/>
+
 </databaseChangeLog>

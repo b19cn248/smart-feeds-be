@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="008-insert-prerequisite-data" author="smartfeed-developer">
+        <comment>Add prerequisite data before inserting sources</comment>
+
+        <!-- 1. Insert settings record -->
+        <insert tableName="settings">
+            <column name="language">en</column>
+            <column name="interface_theme">light</column>
+            <column name="notification_frequency">1</column>
+            <column name="preferred_categories">technology,news,sports</column>
+            <column name="platform">web</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <!-- 2. Insert subscription record -->
+        <insert tableName="subscriptions">
+            <column name="type">free</column>
+            <column name="start_date" valueDate="CURRENT_DATE()"/>
+            <column name="end_date" valueComputed="DATE_ADD(CURRENT_DATE(), INTERVAL 1 YEAR)"/>
+            <column name="price_per_month">0.00</column>
+            <column name="active">true</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <!-- 3. Insert read_later_list record -->
+        <insert tableName="read_later_lists">
+            <column name="name">Default Read Later</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <!-- 4. Insert user record with references to created entities -->
+        <insert tableName="users">
+            <column name="email">test@example.com</column>
+            <column name="password">$2a$10$somesecurehash</column>
+            <column name="name">Test User</column>
+            <column name="location">Hanoi, Vietnam</column>
+            <column name="preferences">news, tech</column>
+            <column name="points">0</column>
+            <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id LIMIT 1)"/>
+            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id LIMIT 1)"/>
+            <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id LIMIT 1)"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <!-- Create folders for organizing sources -->
+        <insert tableName="folders">
+            <column name="name">Technology News</column>
+            <column name="theme">blue</column>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'test@example.com' LIMIT 1)"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <insert tableName="folders">
+            <column name="name">World News</column>
+            <column name="theme">red</column>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'test@example.com' LIMIT 1)"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+
+        <insert tableName="folders">
+            <column name="name">Sports Updates</column>
+            <column name="theme">green</column>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'test@example.com' LIMIT 1)"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted">false</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
