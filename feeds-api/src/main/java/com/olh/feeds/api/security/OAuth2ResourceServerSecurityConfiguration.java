@@ -38,7 +38,8 @@ public class OAuth2ResourceServerSecurityConfiguration {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
-                                "/api/v1/articles/rss-feed", "/api/v1/build/**").permitAll()
+                                "/api/v1/articles/rss-feed", "/api/v1/build/**",
+                                "/api/v1/articles/check-article-exists").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())

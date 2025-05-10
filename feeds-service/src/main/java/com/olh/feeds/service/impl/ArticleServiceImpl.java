@@ -1,5 +1,6 @@
 package com.olh.feeds.service.impl;
 
+import com.olh.feeds.dao.entity.Article;
 import com.olh.feeds.dao.repository.ArticleRepository;
 import com.olh.feeds.dao.repository.SourceRepository;
 import com.olh.feeds.dto.mapper.PageMapper;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -108,5 +110,22 @@ public class ArticleServiceImpl implements ArticleService {
         Page<SourceArticlesResponse> page = new PageImpl<>(pageContent, pageable, sourceArticles.size());
 
         return pageMapper.toPageDto(page);
+    }
+
+    @Override
+    public boolean checkArticleExists(String guid, String link) {
+
+        log.info("Checking if article exists with guid: {} and link: {}", guid, link);
+
+        Optional<Article> article = articleRepository.findByGuidOrLink(guid, link);
+
+        if (article.isPresent()) {
+            log.info("Article already exists with guid: {} and link: {}", guid, link);
+            return true;
+        } else {
+            log.info("Article does not exist with guid: {} and link: {}", guid, link);
+            return false;
+        }
+
     }
 }

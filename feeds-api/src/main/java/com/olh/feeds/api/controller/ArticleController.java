@@ -29,6 +29,7 @@ public class ArticleController {
 
     /**
      * Lấy danh sách articles theo sources mà người dùng đang theo dõi
+     *
      * @param pageable Thông tin phân trang
      * @return Danh sách articles theo sources
      */
@@ -46,6 +47,7 @@ public class ArticleController {
 
     /**
      * Lấy tất cả articles (API cũ, giữ lại để tương thích)
+     *
      * @param pageable Thông tin phân trang
      * @return Danh sách articles
      */
@@ -77,6 +79,20 @@ public class ArticleController {
                 HttpStatus.CREATED.value(),
                 "rss.feed.processing.success",
                 savedArticles
+        );
+    }
+
+    @GetMapping("/check-article-exists")
+    public ResponseGeneral<Boolean> checkArticleExists(
+            @RequestParam String guid,
+            @RequestParam String link
+    ) {
+        log.info("Checking if article exists with guid: {} and link: {}", guid, link);
+        boolean exists = articleService.checkArticleExists(guid, link);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "article.check.exists.success",
+                exists
         );
     }
 }
