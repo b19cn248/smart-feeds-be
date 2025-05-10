@@ -28,4 +28,5 @@ public class ArticleResponse {
     private String author;
     private String imageUrl;
     private String contentSnippet;
+    private String contentEncodedSnippet;
 }

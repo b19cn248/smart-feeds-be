@@ -14,14 +14,16 @@ import java.util.Optional;
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-            "(a.id, a.title, a.content, a.isoDate, a.summary, a.event, s.url, a.link, a.creator, a.enclosureUrl) " +
+            "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
+            " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
             "from Article a join Source s on a.sourceId = s.id ")
     Page<ArticleResponse> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Optional<Article> findByGuidOrLink(String guid, String link);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-            "(a.id, a.title, a.content, a.isoDate, a.summary, a.event, s.url, a.link, a.creator, a.enclosureUrl) " +
+            "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
+            " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
             "from Article a join Source s on a.sourceId = s.id " +
             "where s.id = :sourceId " +
             "order by a.createdAt desc")
