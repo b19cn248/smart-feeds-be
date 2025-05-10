@@ -19,7 +19,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <!-- 2. Insert subscription record -->
@@ -28,12 +28,12 @@
             <column name="start_date" valueDate="CURRENT_DATE()"/>
             <column name="end_date" valueComputed="DATE_ADD(CURRENT_DATE(), INTERVAL 1 YEAR)"/>
             <column name="price_per_month">0.00</column>
-            <column name="active">true</column>
+            <column name="active" valueNumeric="1"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <!-- 3. Insert read_later_list record -->
@@ -43,7 +43,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <!-- 4. Insert user record with references to created entities -->
@@ -61,7 +61,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <!-- Create folders for organizing sources -->
@@ -73,7 +73,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <insert tableName="folders">
@@ -84,7 +84,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
 
         <insert tableName="folders">
@@ -95,7 +95,7 @@
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
             <column name="updated_by">system</column>
-            <column name="is_deleted">false</column>
+            <column name="is_deleted" valueNumeric="0"/>
         </insert>
     </changeSet>
 </databaseChangeLog>
