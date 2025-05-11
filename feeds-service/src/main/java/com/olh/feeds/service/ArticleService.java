@@ -11,4 +11,6 @@ public interface ArticleService {
     PageResponse<SourceArticlesResponse> getArticlesByUserSources(Pageable pageable);
 
     boolean checkArticleExists(String guid, String link);
+
+    ArticleResponse getArticleById(Long articleId);
 }

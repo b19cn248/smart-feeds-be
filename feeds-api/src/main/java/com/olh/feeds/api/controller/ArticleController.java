@@ -63,6 +63,18 @@ public class ArticleController {
         );
     }
 
+    @GetMapping("/{id}")
+    public ResponseGeneral<ArticleResponse> getById(
+            @PathVariable Long id
+    ) {
+        log.info("REST request to get all articles (legacy API)");
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "articles.list.success",
+                articleService.getArticleById(id)
+        );
+    }
+
     @PostMapping("/rss-feed")
     public ResponseGeneral<List<ArticleResponse>> processRssFeed(
             @Validated @RequestBody List<RssItemRequest> items

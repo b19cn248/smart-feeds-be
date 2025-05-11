@@ -1,5 +1,6 @@
 package com.olh.feeds.service.impl;
 
+import com.olh.feeds.core.exception.base.NotFoundException;
 import com.olh.feeds.dao.entity.Article;
 import com.olh.feeds.dao.repository.ArticleRepository;
 import com.olh.feeds.dao.repository.SourceRepository;
@@ -126,6 +127,17 @@ public class ArticleServiceImpl implements ArticleService {
             log.info("Article does not exist with guid: {} and link: {}", guid, link);
             return false;
         }
+
+    }
+
+    @Override
+    public ArticleResponse getArticleById(Long articleId) {
+        log.info("getArticleById: {}", articleId);
+
+        return articleRepository.findArticleById(articleId)
+                .orElseThrow(
+                        () -> new NotFoundException("Article not found with id: " + articleId)
+                );
 
     }
 }
