@@ -5,6 +5,7 @@ import com.olh.feeds.dto.request.folder.FolderSourceRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.folder.FolderDetailResponse;
 import com.olh.feeds.dto.response.folder.FolderResponse;
+import com.olh.feeds.dto.response.folder.FolderWithArticlesResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface FolderService {
@@ -44,4 +45,20 @@ public interface FolderService {
      * @return Updated folder details
      */
     FolderDetailResponse addSourceToFolder(Long folderId, FolderSourceRequest request);
+
+    /**
+     * Get folders with articles for current user
+     * @param pageable Pagination for folders
+     * @param articlePageSize Number of articles per folder
+     * @return List of folders with articles
+     */
+    PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize);
+
+    /**
+     * Get folder details with paginated articles
+     * @param folderId Folder ID
+     * @param articlesPageable Pagination for articles
+     * @return Folder with paginated articles
+     */
+    FolderDetailResponse getFolderArticles(Long folderId, Pageable articlesPageable);
 }

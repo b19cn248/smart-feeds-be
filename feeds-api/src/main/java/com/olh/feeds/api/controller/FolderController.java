@@ -6,6 +6,7 @@ import com.olh.feeds.dto.request.folder.FolderSourceRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.folder.FolderDetailResponse;
 import com.olh.feeds.dto.response.folder.FolderResponse;
+import com.olh.feeds.dto.response.folder.FolderWithArticlesResponse;
 import com.olh.feeds.service.FolderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -119,6 +120,46 @@ public class FolderController {
                 HttpStatus.OK.value(),
                 "folder.source.add.success",
                 folder
+        );
+    }
+
+    /**
+     * Lấy danh sách folders kèm articles cho mỗi folder
+     *
+     * @param pageable Thông tin phân trang cho folders
+     * @param articleSize Số lượng articles cho mỗi folder
+     * @return Danh sách folders với articles
+     */
+    @GetMapping("/with-articles")
+    public ResponseGeneral<PageResponse<FolderWithArticlesResponse>> getFoldersWithArticles(
+            @PageableDefault Pageable pageable,
+            @RequestParam(name = "article_size", defaultValue = "5") int articleSize
+    ) {
+        log.info("REST request to get folders with articles for current user");
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "folder.with.articles.success",
+                folderService.getFoldersWithArticles(pageable, articleSize)
+        );
+    }
+
+    /**
+     * Lấy chi tiết folder kèm danh sách articles có phân trang
+     *
+     * @param id ID của folder
+     * @param articlesPageable Thông tin phân trang cho articles
+     * @return Thông tin chi tiết folder với articles
+     */
+    @GetMapping("/{id}/articles")
+    public ResponseGeneral<FolderDetailResponse> getFolderWithArticles(
+            @PathVariable("id") Long id,
+            @PageableDefault Pageable articlesPageable
+    ) {
+        log.info("REST request to get folder with articles for ID: {}", id);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "folder.articles.success",
+                folderService.getFolderArticles(id, articlesPageable)
         );
     }
 }

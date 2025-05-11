@@ -2,9 +2,7 @@ package com.olh.feeds.dto.response.folder;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.ArticleResponse;
-import com.olh.feeds.dto.response.source.SourceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,12 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Builder
-public class FolderDetailResponse {
+public class FolderWithArticlesResponse {
     private Long id;
     private String name;
     private String theme;
     private Long userId;
     private LocalDateTime createdAt;
-    private List<SourceResponse> sources;
-    private PageResponse<ArticleResponse> articles; // Thêm trường này
+    private List<ArticleResponse> articles;
 }
