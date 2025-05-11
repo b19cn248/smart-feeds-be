@@ -26,8 +26,8 @@
     <!-- Add missing columns to folder_sources table -->
     <include file="classpath:db/changelog/007-add-missing-columns.xml"/>
 
-    <!-- Insert prerequisite data -->
-<!--    <include file="classpath:db/changelog/008-insert-prerequisite-data.xml"/>-->
+    <!--    Insert prerequisite data-->
+    <include file="classpath:db/changelog/008-insert-prerequisite-data.xml"/>
 
     <!-- Add board management tables -->
     <include file="classpath:db/changelog/009-add-board-tables.xml"/>
