@@ -2,6 +2,8 @@
 package com.olh.feeds.dao.repository;
 
 import com.olh.feeds.dao.entity.TeamUser;
+import com.olh.feeds.dto.response.team.TeamMemberResponse;
+import com.olh.feeds.dto.response.teamboard.TeamBoardUserResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -67,4 +69,19 @@ public interface TeamUserRepository extends JpaRepository<TeamUser, Long> {
             @Param("userId") Long userId,
             @Param("role") String role
     );
+
+    @Query("""
+            SELECT new com.olh.feeds.dto.response.team.TeamMemberResponse(
+                tu.id,
+                tu.teamId,
+                tu.userId,
+                u.email,
+                u.name,
+                tu.role,
+                tu.createdAt
+            )
+            FROM TeamUser tu join User u on tu.userId = u.id where tu.teamId = :teamId AND tu.isDeleted = false
+            """)
+
+    List<TeamMemberResponse> getMembersByTeamId(Long teamId);
 }
