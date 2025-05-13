@@ -75,7 +75,7 @@
             <column name="location" type="varchar(255)"/>
             <column name="preferences" type="text"/>
             <column name="points" type="int" defaultValueNumeric="0"/>
-            <column name="keycloak_id" type="bigint" />
+            <column name="keycloak_id" type="varchar(255)"/>
             <column name="settings_id" type="bigint">
                 <constraints foreignKeyName="fk_users_settings" references="settings(id)"/>
             </column>
