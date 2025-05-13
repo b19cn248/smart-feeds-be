@@ -189,14 +189,16 @@
         <!-- 4. Insert user records with references to created entities -->
         <insert tableName="users">
             <column name="email">hieu_1@gmail.com</column>
-            <column name="password">$2a$10$hashvalue123456789012345678901234567890</column>
+            <column name="username">hieuptit1</column>
             <column name="name">Hieu Nguyen 1</column>
             <column name="location">Hanoi, Vietnam</column>
             <column name="preferences">technology, business, AI</column>
             <column name="points">100</column>
             <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id DESC LIMIT 1 OFFSET 4)"/>
-            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 4)"/>
-            <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 4)"/>
+            <column name="read_later_list_id"
+                    valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 4)"/>
+            <column name="subscription_id"
+                    valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 4)"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
@@ -206,14 +208,16 @@
 
         <insert tableName="users">
             <column name="email">hieu_2@gmail.com</column>
-            <column name="password">$2a$10$hashvalue123456789012345678901234567890</column>
+            <column name="username">hieuptit2</column>
             <column name="name">Hieu Nguyen 2</column>
             <column name="location">Ho Chi Minh City, Vietnam</column>
             <column name="preferences">news, sports, local</column>
             <column name="points">75</column>
             <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id DESC LIMIT 1 OFFSET 3)"/>
-            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 3)"/>
-            <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 3)"/>
+            <column name="read_later_list_id"
+                    valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 3)"/>
+            <column name="subscription_id"
+                    valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 3)"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
@@ -223,14 +227,16 @@
 
         <insert tableName="users">
             <column name="email">hieu_3@gmail.com</column>
-            <column name="password">$2a$10$hashvalue123456789012345678901234567890</column>
+            <column name="username">hieuptit3</column>
             <column name="name">Hieu Nguyen 3</column>
             <column name="location">Da Nang, Vietnam</column>
             <column name="preferences">finance, investments, cryptocurrency</column>
             <column name="points">250</column>
             <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id DESC LIMIT 1 OFFSET 2)"/>
-            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 2)"/>
-            <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 2)"/>
+            <column name="read_later_list_id"
+                    valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 2)"/>
+            <column name="subscription_id"
+                    valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 2)"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
@@ -240,14 +246,16 @@
 
         <insert tableName="users">
             <column name="email">hieu_4@gmail.com</column>
-            <column name="password">$2a$10$hashvalue123456789012345678901234567890</column>
+            <column name="username">hieuptit4</column>
             <column name="name">Hieu Nguyen 4</column>
             <column name="location">Nha Trang, Vietnam</column>
             <column name="preferences">travel, food, culture</column>
             <column name="points">50</column>
             <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id DESC LIMIT 1 OFFSET 1)"/>
-            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 1)"/>
-            <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 1)"/>
+            <column name="read_later_list_id"
+                    valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1 OFFSET 1)"/>
+            <column name="subscription_id"
+                    valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1 OFFSET 1)"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="created_by">system</column>
@@ -257,13 +265,14 @@
 
         <insert tableName="users">
             <column name="email">hieu_5@gmail.com</column>
-            <column name="password">$2a$10$hashvalue123456789012345678901234567890</column>
+            <column name="username">hieuptit5</column>
             <column name="name">Hieu Nguyen 5</column>
             <column name="location">Hue, Vietnam</column>
             <column name="preferences">science, health, environment</column>
             <column name="points">150</column>
             <column name="settings_id" valueComputed="(SELECT id FROM settings ORDER BY id DESC LIMIT 1)"/>
-            <column name="read_later_list_id" valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1)"/>
+            <column name="read_later_list_id"
+                    valueComputed="(SELECT id FROM read_later_lists ORDER BY id DESC LIMIT 1)"/>
             <column name="subscription_id" valueComputed="(SELECT id FROM subscriptions ORDER BY id DESC LIMIT 1)"/>
             <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
             <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>

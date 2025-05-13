@@ -17,8 +17,8 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column(name = "username", nullable = false)
+    private String username;
 
     @Column(name = "name")
     private String name;
@@ -40,4 +40,7 @@ public class User extends BaseEntity {
 
     @Column(name = "subscription_id")
     private Long subscriptionId;
+
+    @Column(name = "keycloak_id")
+    private String keycloakId;
 }

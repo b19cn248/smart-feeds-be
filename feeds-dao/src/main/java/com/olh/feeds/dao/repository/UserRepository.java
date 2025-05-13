@@ -30,4 +30,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         AND u.isDeleted = false
         """)
     List<User> findUsersByQuery(@Param("query") String query);
+    Optional<User> findByUsername(String username);
+    Optional<User> findByKeycloakId(String keycloakId);
+    boolean existsByUsername(String username);
+    boolean existsByKeycloakId(String keycloakId);
 }
