@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SourceRepository extends JpaRepository<Source, Long> {
@@ -34,4 +35,8 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
             "WHERE s.id = :sourceId " +
             "AND s.isDeleted = false")
     SourceResponse findSourceById(@Param("sourceId") Long sourceId);
+
+    @Query("SELECT s FROM Source s WHERE s.url = :url AND s.isDeleted = false")
+    List<Source> findAllByUrl(@Param("url") String url);
+
 }

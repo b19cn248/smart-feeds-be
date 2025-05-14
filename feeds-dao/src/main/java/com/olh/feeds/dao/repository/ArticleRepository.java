@@ -1,7 +1,9 @@
 package com.olh.feeds.dao.repository;
 
 import com.olh.feeds.dao.entity.Article;
+import com.olh.feeds.dao.entity.Source;
 import com.olh.feeds.dto.response.article.ArticleResponse;
+import com.olh.feeds.dto.response.source.SourceResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +27,16 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "from Article a join Source s on a.sourceId = s.id where a.id = :id")
     Optional<ArticleResponse> findArticleById(Long id);
 
-    Optional<Article> findByGuidOrLink(String guid, String link);
+    Optional<Article> findByGuid(String guid);
+
+    @Query("SELECT s FROM Source s WHERE s.url = :url")
+    List<Source> findAllByUrl(@Param("url") String url);
+
+    @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(s.id, s.url, s.type, s.active) " +
+            "FROM Source s WHERE s.id = :id AND s.isDeleted = false")
+    SourceResponse findSourceById(@Param("id") Long id);
+
+    Optional<Article> findByLink(String link);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
             "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +

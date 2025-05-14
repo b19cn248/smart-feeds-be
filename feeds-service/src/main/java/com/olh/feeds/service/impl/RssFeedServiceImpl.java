@@ -48,30 +48,106 @@ public class RssFeedServiceImpl implements RssFeedService {
 
         List<Article> articlesToSave = new ArrayList<>();
         List<ArticleResponse> responses = new ArrayList<>();
+        List<RssItemRequest> itemsToProcess = new ArrayList<>();
 
         for (RssItemRequest item : request.getItems()) {
             try {
-                Optional<Article> articleInDB = articleRepository.findByGuidOrLink(item.getGuid(), item.getLink());
-                if (articleInDB.isPresent()) {
-                    log.info("Article already exists, skipping");
+                // Chuẩn hóa guid và link
+                String normalizedGuid = normalizeGuid(item.getGuid());
+                String normalizedLink = normalizeUrl(item.getLink());
+
+                // Kiểm tra trùng lặp dựa trên guid hoặc link
+                boolean articleExists = false;
+                if (normalizedGuid != null && !normalizedGuid.isEmpty()) {
+                    if (articleRepository.findByGuid(normalizedGuid).isPresent()) {
+                        log.info("Article with guid {} already exists, skipping. Title: {}", normalizedGuid, item.getTitle());
+                        articleExists = true;
+                    }
+                }
+                if (!articleExists && normalizedLink != null && !normalizedLink.isEmpty()) {
+                    if (articleRepository.findByLink(normalizedLink).isPresent()) {
+                        log.info("Article with link {} already exists, skipping. Title: {}", normalizedLink, item.getTitle());
+                        articleExists = true;
+                    }
+                }
+
+                if (articleExists) {
                     continue;
                 }
 
                 Source source = findOrCreateSource(item);
                 Article article = createArticleFromRequest(item, source.getId());
+                article.setGuid(normalizedGuid);
+                article.setLink(normalizedLink);
                 articlesToSave.add(article);
+                itemsToProcess.add(item);
 
             } catch (Exception e) {
-                log.error("Error processing RSS item: {}", item.getTitle(), e);
-                throw new BadRequestException(e.getMessage());
+                log.error("Error processing RSS item: {}. Guid: {}, Link: {}", item.getTitle(), item.getGuid(), item.getLink(), e);
+                throw new BadRequestException("Failed to process RSS item: " + item.getTitle() + ". Error: " + e.getMessage());
             }
         }
 
         if (!articlesToSave.isEmpty()) {
             List<Article> savedArticles = articleRepository.saveAll(articlesToSave);
+            log.info("Saved {} articles to database", savedArticles.size());
+
+            // Xử lý hashtag sau khi lưu bài viết
+            for (int i = 0; i < savedArticles.size(); i++) {
+                Article article = savedArticles.get(i);
+                RssItemRequest item = itemsToProcess.get(i);
+                log.debug("Processing hashtags for article ID: {}, Title: {}", article.getId(), article.getTitle());
+
+                if (item.getHashtag() != null && !item.getHashtag().isEmpty()) {
+                    log.info("Found {} hashtags for article ID: {}", item.getHashtag().size(), article.getId());
+                    for (String hashtag : item.getHashtag()) {
+                        try {
+                            // Chuẩn hóa hashtag
+                            String normalizedHashtag = hashtag.trim().toLowerCase();
+                            log.debug("Processing hashtag: {}", normalizedHashtag);
+
+                            // Tìm hoặc tạo tag
+                            Tag tag = tagRepository.findByName(normalizedHashtag)
+                                    .orElseGet(() -> {
+                                        Tag newTag = Tag.builder()
+                                                .name(normalizedHashtag)
+                                                .createdAt(LocalDateTime.now())
+                                                .createdBy("system")
+                                                .isDeleted(false)
+                                                .build();
+                                        Tag savedTag = tagRepository.save(newTag);
+                                        log.info("Created new tag: {} with ID: {}", normalizedHashtag, savedTag.getId());
+                                        return savedTag;
+                                    });
+
+                            // Kiểm tra xem ArticleTag đã tồn tại chưa
+                            boolean articleTagExists = articleTagRepository.existsByArticleIdAndTagId(article.getId(), tag.getId());
+                            if (!articleTagExists) {
+                                // Tạo bản ghi trong article_tags
+                                ArticleTag articleTag = ArticleTag.builder()
+                                        .articleId(article.getId())
+                                        .tagId(tag.getId())
+                                        .createdAt(LocalDateTime.now())
+                                        .createdBy("system")
+                                        .isDeleted(false)
+                                        .build();
+                                articleTagRepository.save(articleTag);
+                                log.info("Created ArticleTag for article ID: {} and tag ID: {}", article.getId(), tag.getId());
+                            } else {
+                                log.debug("ArticleTag already exists for article ID: {} and tag ID: {}", article.getId(), tag.getId());
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to process hashtag '{}' for article ID: {}", hashtag, article.getId(), e);
+                        }
+                    }
+                } else {
+                    log.debug("No hashtags found for article ID: {}", article.getId());
+                }
+            }
+
             responses = savedArticles.stream()
-                  .map(this::convertToResponse)
-                  .toList();
+                    .map(this::convertToResponse)
+                    .toList();
         }
 
         log.info("Successfully processed {} articles", responses.size());
@@ -80,52 +156,66 @@ public class RssFeedServiceImpl implements RssFeedService {
 
     private Source findOrCreateSource(RssItemRequest item) {
         String sourceUrl = extractSourceUrl(item.getLink());
+        log.debug("Finding or creating source for URL: {}", sourceUrl);
 
-        return sourceRepository.findByUrl(sourceUrl)
-              .orElseGet(() -> {
-                  Source newSource = Source.builder()
-                        .url(sourceUrl)
-                        .type("RSS")
-                        .active(true)
-                        .userId(1L)
-                        .build();
-                  return sourceRepository.save(newSource);
-              });
+        // Tìm tất cả các nguồn với URL đã cho
+        List<Source> sources = sourceRepository.findAllByUrl(sourceUrl); // Sửa lỗi từ articleRepository thành sourceRepository
+        if (!sources.isEmpty()) {
+            // Chọn nguồn gần nhất dựa trên created_at
+            Source source = sources.stream()
+                    .filter(s -> !s.getIsDeleted())
+                    .sorted((s1, s2) -> s2.getCreatedAt().compareTo(s1.getCreatedAt()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No non-deleted source found for URL: " + sourceUrl));
+            log.info("Found existing source with URL: {} and ID: {}", sourceUrl, source.getId());
+            return source;
+        }
+
+        // Tạo nguồn mới nếu không tìm thấy
+        log.info("No source found for URL: {}. Creating new source.", sourceUrl);
+        Source newSource = Source.builder()
+                .url(sourceUrl)
+                .type("RSS")
+                .active(true)
+                .userId(1L)
+                .build();
+        return sourceRepository.save(newSource);
     }
 
     private String extractSourceUrl(String link) {
         if (link == null || link.isEmpty()) {
+            log.warn("Link is null or empty, returning 'unknown' as source URL");
             return "unknown";
         }
 
         try {
             java.net.URL url = new java.net.URL(link);
-            return url.getProtocol() + "://" + url.getHost();
+            String sourceUrl = url.getProtocol() + "://" + url.getHost();
+            return normalizeUrl(sourceUrl);
         } catch (Exception e) {
-            log.warn("Failed to extract source URL from: {}", link);
-            return link;
+            log.warn("Failed to extract source URL from: {}", link, e);
+            return normalizeUrl(link);
         }
     }
 
     private Article createArticleFromRequest(RssItemRequest request, Long sourceId) {
         String enclosureUrl = this.extractImageFromContent(request.getContent());
 
+        // Tạo đối tượng Article
         Article article = Article.builder()
-              .title(request.getTitle())
-              .creator(request.getCreator())
-              .link(request.getLink())
-              .guid(request.getGuid())
-              .content(request.getContent())
-              .enclosureUrl(enclosureUrl)
-              .contentSnippet(request.getContentSnippet())
-              .contentEncoded(request.getContentEncoded())
-              .contentEncodedSnippet(request.getContentEncodedSnippet())
-              .dcCreator(request.getDcCreator())
-              .sourceId(sourceId)
-              .build();
+                .title(request.getTitle())
+                .creator(request.getCreator())
+                .content(request.getContent())
+                .enclosureUrl(enclosureUrl)
+                .contentSnippet(request.getContentSnippet())
+                .contentEncoded(request.getContentEncoded())
+                .contentEncodedSnippet(request.getContentEncodedSnippet())
+                .dcCreator(request.getDcCreator())
+                .sourceId(sourceId)
+                .build();
 
         if (request.getPubDate() != null) {
-            article.setPubDate(DateTimeUtils.parseRFC822DateSafely(request.getPubDate()));
+            article.setPubDate(parseDateTime(request.getPubDate()));
         }
         if (request.getIsoDate() != null) {
             article.setIsoDate(parseIsoDateTime(request.getIsoDate()));
@@ -141,39 +231,37 @@ public class RssFeedServiceImpl implements RssFeedService {
             try {
                 article.setItunesData(objectMapper.writeValueAsString(request.getItunes()));
             } catch (Exception e) {
-                log.warn("Failed to serialize iTunes data", e);
-            }
-        }
-
-        // Xử lý hashtag
-        if (request.getHashtag() != null && !request.getHashtag().isEmpty()) {
-            for (String hashtag : request.getHashtag()) {
-                // Tìm hoặc tạo tag
-                Tag tag = tagRepository.findByName(hashtag)
-                      .orElseGet(() -> {
-                          Tag newTag = Tag.builder()
-                                .name(hashtag)
-                                .createdAt(LocalDateTime.now())
-                                .createdBy("system")
-                                .isDeleted(false)
-                                .build();
-                          return tagRepository.save(newTag);
-                      });
-
-                // Lưu vào bảng article_tags sau khi bài viết được lưu
-                articleRepository.save(article); // Lưu bài viết để có ID
-                ArticleTag articleTag = ArticleTag.builder()
-                      .articleId(article.getId())
-                      .tagId(tag.getId())
-                      .createdAt(LocalDateTime.now())
-                      .createdBy("system")
-                      .isDeleted(false)
-                      .build();
-                articleTagRepository.save(articleTag);
+                log.warn("Failed to serialize iTunes data for article: {}", request.getTitle(), e);
             }
         }
 
         return article;
+    }
+
+    private String normalizeUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return url;
+        }
+        try {
+            url = url.trim();
+            if (url.startsWith("http://")) {
+                url = "https://" + url.substring(7);
+            }
+            if (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            return url;
+        } catch (Exception e) {
+            log.warn("Failed to normalize URL: {}", url, e);
+            return url;
+        }
+    }
+
+    private String normalizeGuid(String guid) {
+        if (guid == null || guid.isEmpty()) {
+            return guid;
+        }
+        return guid.trim();
     }
 
     private LocalDateTime parseDateTime(String dateStr) {
@@ -181,7 +269,7 @@ public class RssFeedServiceImpl implements RssFeedService {
             DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
             return ZonedDateTime.parse(dateStr, formatter).toLocalDateTime();
         } catch (Exception e) {
-            log.warn("Failed to parse date: {}", dateStr);
+            log.warn("Failed to parse date: {}", dateStr, e);
             return LocalDateTime.now();
         }
     }
@@ -190,33 +278,32 @@ public class RssFeedServiceImpl implements RssFeedService {
         try {
             return LocalDateTime.parse(isoDateStr.replace("Z", ""));
         } catch (Exception e) {
-            log.warn("Failed to parse ISO date: {}", isoDateStr);
+            log.warn("Failed to parse ISO date: {}", isoDateStr, e);
             return LocalDateTime.now();
         }
     }
 
     private ArticleResponse convertToResponse(Article article) {
-        // Lấy danh sách hashtag từ bảng article_tags
         List<ArticleTag> articleTags = articleTagRepository.findByArticleId(article.getId());
         List<String> hashtags = articleTags.stream()
-              .map(articleTag -> tagRepository.findById(articleTag.getTagId()))
-              .filter(Optional::isPresent)
-              .map(opt -> opt.get().getName())
-              .toList();
+                .map(articleTag -> tagRepository.findById(articleTag.getTagId()))
+                .filter(Optional::isPresent)
+                .map(opt -> opt.get().getName())
+                .toList();
 
         return ArticleResponse.builder()
-              .id(article.getId())
-              .title(article.getTitle())
-              .content(article.getContent())
-              .contentEncoded(article.getContentEncoded())
-              .publishDate(article.getPubDate() != null ? article.getPubDate() : null)
-              .content(article.getContentSnippet())
-              .url(article.getLink())
-              .summary(article.getSummary())
-              .event(article.getEvent())
-              .imageUrl(article.getEnclosureUrl())
-              .hashtag(hashtags)
-              .build();
+                .id(article.getId())
+                .title(article.getTitle())
+                .content(article.getContent())
+                .contentEncoded(article.getContentEncoded())
+                .publishDate(article.getPubDate() != null ? article.getPubDate() : null)
+                .content(article.getContentSnippet())
+                .url(article.getLink())
+                .summary(article.getSummary())
+                .event(article.getEvent())
+                .imageUrl(article.getEnclosureUrl())
+                .hashtag(hashtags)
+                .build();
     }
 
     private String extractImageFromContent(String content) {
@@ -225,16 +312,16 @@ public class RssFeedServiceImpl implements RssFeedService {
         }
 
         List<String> patterns = Arrays.asList(
-              "src=''(.*?)''",
-              "src=\"(.*?)\"",
-              "src = ''(.*?)''",
-              "src = \"(.*?)\"",
-              "src=\"(.*?)\"",
-              "data-src=\"(.*?)\"",
-              "data-src=''(.*?)''",
-              "srcset=\"(.*?)(?:\\s|\")",
-              "src=\"data:image.*?;base64,(.*?)\"",
-              "src=(https?://[^\\s>]+)"
+                "src=''(.*?)''",
+                "src=\"(.*?)\"",
+                "src = ''(.*?)''",
+                "src = \"(.*?)\"",
+                "src=\"(.*?)\"",
+                "data-src=\"(.*?)\"",
+                "data-src=''(.*?)''",
+                "srcset=\"(.*?)(?:\\s|\")",
+                "src=\"data:image.*?;base64,(.*?)\"",
+                "src=(https?://[^\\s>]+)"
         );
 
         for (String patternStr : patterns) {
