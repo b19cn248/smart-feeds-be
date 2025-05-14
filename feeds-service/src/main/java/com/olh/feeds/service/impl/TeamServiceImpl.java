@@ -53,7 +53,7 @@ public class TeamServiceImpl implements TeamService {
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
         log.info("Current username: {}", username);
 
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         // Get teams where user is a member
@@ -84,7 +84,7 @@ public class TeamServiceImpl implements TeamService {
 
         // Get current user
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         // Create team
@@ -120,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
 
         // Check if user has admin permission in team
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
-        User currentUser = userRepository.findByEmail(username)
+        User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         boolean isAdmin = teamUserRepository.existsByTeamIdAndUserIdAndRole(

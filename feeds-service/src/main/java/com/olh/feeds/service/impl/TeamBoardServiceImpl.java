@@ -84,7 +84,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
         log.info("Team board created with ID: {}", teamBoard.getId());
 
         // Add creator as admin
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         TeamBoardUser teamBoardUser = TeamBoardUser.builder()
@@ -171,7 +171,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
 
         // Check user permission
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         String permission = teamBoardUserRepository.findPermissionByTeamBoardIdAndUserId(id, user.getId())
@@ -209,7 +209,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
 
         // Get user ID
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         // Get boards where user is a member
@@ -453,7 +453,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
 
         // Get creator info
         String username = note.getCreatedBy();
-        String creatorName = userRepository.findByEmail(username)
+        String creatorName = userRepository.findByUsername(username)
                 .map(User::getName)
                 .orElse(username);
 
@@ -516,7 +516,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
 
         // Get creator info
         String username = highlight.getCreatedBy();
-        String creatorName = userRepository.findByEmail(username)
+        String creatorName = userRepository.findByUsername(username)
                 .map(User::getName)
                 .orElse(username);
 
@@ -808,7 +808,7 @@ public class TeamBoardServiceImpl implements TeamBoardService {
                 .orElseThrow(() -> new NotFoundException(id.toString(), "team_board"));
 
         String username = auditorAware.getCurrentAuditor().orElse("anonymous");
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
         // Check if user has required permission
