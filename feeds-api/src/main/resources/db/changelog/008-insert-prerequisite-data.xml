@@ -48,8 +48,8 @@
 
         <!-- 4. Insert user record with references to created entities -->
         <insert tableName="users">
-            <column name="email">test@example.com</column>
-            <column name="password">$2a$10$somesecurehash</column>
+            <column name="email">hieu_0@gmail.com</column>
+            <column name="username">hieu</column>
             <column name="name">Test User</column>
             <column name="location">Hanoi, Vietnam</column>
             <column name="preferences">news, tech</column>

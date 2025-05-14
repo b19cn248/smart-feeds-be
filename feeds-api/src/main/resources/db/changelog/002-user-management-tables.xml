@@ -68,13 +68,14 @@
             <column name="email" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="password" type="varchar(255)">
-                <constraints nullable="false"/>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
             <column name="location" type="varchar(255)"/>
             <column name="preferences" type="text"/>
             <column name="points" type="int" defaultValueNumeric="0"/>
+            <column name="keycloak_id" type="varchar(255)"/>
             <column name="settings_id" type="bigint">
                 <constraints foreignKeyName="fk_users_settings" references="settings(id)"/>
             </column>
