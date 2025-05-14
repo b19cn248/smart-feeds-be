@@ -32,4 +32,9 @@
     <!-- Add board management tables -->
     <include file="classpath:db/changelog/009-add-board-tables.xml"/>
 
+    <!-- Add team board management tables -->
+    <include file="classpath:db/changelog/010-add-teamboard-tables.xml"/>
+
+    <include file="classpath:db/changelog/011-insert-sample-users-enterprise.xml"/>
+
 </databaseChangeLog>
