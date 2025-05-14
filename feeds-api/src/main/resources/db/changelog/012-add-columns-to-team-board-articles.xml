@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="012-add-columns-to-team-board-articles" author="smartfeed-developer">
+        <comment>Add updated_by and updated_at columns to team_board_articles table</comment>
+        <addColumn tableName="team_board_articles">
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
