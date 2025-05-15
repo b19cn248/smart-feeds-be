@@ -26,6 +26,8 @@ public class RssItemRequest {
     @NotBlank(message = "{article.link.required}")
     private String link;
 
+    private String enclosureUrl;
+
     private String pubDate;
 
     private String contentEncoded;
