@@ -43,9 +43,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
             "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
             " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-            "from Article a join Source s on a.sourceId = s.id " +
-            "where s.id = :sourceId and a.isDeleted = false" +
-            "order by a.createdAt desc")
+            " from Article a join Source s on a.sourceId = s.id " +
+            " where s.id = :sourceId and a.isDeleted = false" +
+            " order by a.createdAt desc")
     List<ArticleResponse> findBySourceId(@Param("sourceId") Long sourceId, Pageable pageable);
 
     @Query("select distinct a.sourceId from Article a " +
