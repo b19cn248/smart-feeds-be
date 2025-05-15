@@ -7,8 +7,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:example@gmail.com}
-    password: ${MAIL_PASSWORD:your_password}
+    username: ${MAIL_USERNAME:hieunm123.ptit@gmail.com}
+    password: ${MAIL_PASSWORD:yznf hkso oswy ufmx}
     properties:
       mail:
         smtp:
@@ -27,10 +27,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.MySQL8Dialect
 
   liquibase:
