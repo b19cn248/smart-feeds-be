@@ -18,31 +18,33 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
             "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
             " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-            "from Article a join Source s on a.sourceId = s.id ")
+            "from Article a join Source s on a.sourceId = s.id and a.isDeleted = false " )
     Page<ArticleResponse> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
             "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
             " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-            "from Article a join Source s on a.sourceId = s.id where a.id = :id")
+            "from Article a join Source s on a.sourceId = s.id where a.id = :id and a.isDeleted = false")
     Optional<ArticleResponse> findArticleById(Long id);
 
+    @Query("SELECT a FROM Article a WHERE a.guid = :guid AND a.isDeleted = false")
     Optional<Article> findByGuid(String guid);
 
-    @Query("SELECT s FROM Source s WHERE s.url = :url")
+    @Query("SELECT s FROM Source s WHERE s.url = :url and s.isDeleted = false")
     List<Source> findAllByUrl(@Param("url") String url);
 
     @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(s.id, s.url, s.type, s.active) " +
             "FROM Source s WHERE s.id = :id AND s.isDeleted = false")
     SourceResponse findSourceById(@Param("id") Long id);
 
+    @Query("SELECT a FROM Article a WHERE a.link = :link AND a.isDeleted = false")
     Optional<Article> findByLink(String link);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
             "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
             " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
             "from Article a join Source s on a.sourceId = s.id " +
-            "where s.id = :sourceId " +
+            "where s.id = :sourceId and a.isDeleted = false" +
             "order by a.createdAt desc")
     List<ArticleResponse> findBySourceId(@Param("sourceId") Long sourceId, Pageable pageable);
 
@@ -54,13 +56,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "and f.isDeleted = false " +
             "and fs.isDeleted = false " +
             "and s.isDeleted = false " +
-            "and s.active = true")
+            "and s.active = true and a.isDeleted = false")
     List<Long> findSourceIdsByUsername(@Param("username") String username);
 
     @Query("""
-            SELECT COUNT(a) 
-            FROM Article a 
-            WHERE a.sourceId IN :sourceIds 
+            SELECT COUNT(a)
+            FROM Article a
+            WHERE a.sourceId IN :sourceIds
             AND a.isDeleted = false
             """)
     int countBySourceIdIn(@Param("sourceIds") List<Long> sourceIds);
@@ -70,7 +72,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                 a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary,
                 a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet
             )
-            FROM Article a 
+            FROM Article a
             JOIN Source s ON a.sourceId = s.id
             WHERE a.sourceId IN :sourceIds
             AND a.isDeleted = false
