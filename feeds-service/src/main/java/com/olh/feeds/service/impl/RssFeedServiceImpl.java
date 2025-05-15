@@ -293,6 +293,10 @@ public class RssFeedServiceImpl implements RssFeedService {
     private Article createArticleFromRequest(RssItemRequest request, Long sourceId) {
         String enclosureUrl = this.extractImageFromContent(request.getContent());
 
+        if (enclosureUrl.isBlank()) {
+            enclosureUrl = this.extractSourceUrl(request.getContentEncoded());
+        }
+
         Article article = Article.builder()
                 .title(request.getTitle())
                 .creator(request.getCreator())
