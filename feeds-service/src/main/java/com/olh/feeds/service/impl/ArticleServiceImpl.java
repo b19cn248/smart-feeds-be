@@ -115,19 +115,28 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public boolean checkArticleExists(String guid, String link) {
-
         log.info("Checking if article exists with guid: {} and link: {}", guid, link);
 
-        Optional<Article> article = articleRepository.findByGuidOrLink(guid, link);
+        // Chuẩn hóa guid và link
+        String normalizedGuid = normalizeGuid(guid);
+        String normalizedLink = normalizeUrl(link);
 
-        if (article.isPresent()) {
-            log.info("Article already exists with guid: {} and link: {}", guid, link);
-            return true;
-        } else {
-            log.info("Article does not exist with guid: {} and link: {}", guid, link);
-            return false;
+        // Kiểm tra trùng lặp dựa trên guid hoặc link
+        if (normalizedGuid != null && !normalizedGuid.isEmpty()) {
+            if (articleRepository.findByGuid(normalizedGuid).isPresent()) {
+                log.info("Article already exists with guid: {}", normalizedGuid);
+                return true;
+            }
+        }
+        if (normalizedLink != null && !normalizedLink.isEmpty()) {
+            if (articleRepository.findByLink(normalizedLink).isPresent()) {
+                log.info("Article already exists with link: {}", normalizedLink);
+                return true;
+            }
         }
 
+        log.info("Article does not exist with guid: {} and link: {}", normalizedGuid, normalizedLink);
+        return false;
     }
 
     @Override
@@ -138,6 +147,33 @@ public class ArticleServiceImpl implements ArticleService {
                 .orElseThrow(
                         () -> new NotFoundException("Article not found with id: " + articleId)
                 );
+    }
 
+    private String normalizeUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return url;
+        }
+        try {
+            // Chuẩn hóa URL: loại bỏ khoảng trắng, chuyển thành https, loại bỏ trailing slash
+            url = url.trim();
+            if (url.startsWith("http://")) {
+                url = "https://" + url.substring(7);
+            }
+            if (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            return url;
+        } catch (Exception e) {
+            log.warn("Failed to normalize URL: {}", url, e);
+            return url;
+        }
+    }
+
+    private String normalizeGuid(String guid) {
+        if (guid == null || guid.isEmpty()) {
+            return guid;
+        }
+        // Chuẩn hóa GUID: loại bỏ khoảng trắng
+        return guid.trim();
     }
 }

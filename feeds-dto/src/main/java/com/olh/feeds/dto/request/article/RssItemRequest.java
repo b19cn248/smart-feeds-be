@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -44,4 +45,6 @@ public class RssItemRequest {
     private String isoDate;
 
     private ItunesRequest itunes;
+
+    private List<String> hashtag;
 }

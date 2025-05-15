@@ -25,4 +25,11 @@ public class SourceResponse {
     private Long userId;
     private Boolean active;
     private LocalDateTime createdAt;
+
+    public SourceResponse(Long id, String url, String type, Boolean active) {
+        this.id = id;
+        this.url = url;
+        this.type = type;
+        this.active = active;
+    }
 }
