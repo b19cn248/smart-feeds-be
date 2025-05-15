@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Thông báo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.8em;
+            color: #777;
+            border-top: 1px solid #eee;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1 th:text="${title}">Tiêu đề thông báo</h1>
+</div>
+
+<div class="content">
+    <p th:utext="${content}">Nội dung thông báo sẽ xuất hiện ở đây.</p>
+
+    <div style="text-align: center;">
+        <a th:href="${link}" class="button">Xem chi tiết</a>
+    </div>
+</div>
+
+<div class="footer">
+    <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+    <p>&copy; 2025 Công ty của bạn. Tất cả các quyền được bảo lưu.</p>
+</div>
+</body>
+</html>

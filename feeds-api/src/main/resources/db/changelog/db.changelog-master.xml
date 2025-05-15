@@ -37,4 +37,6 @@
 
     <include file="classpath:db/changelog/011-insert-sample-users-enterprise.xml"/>
 
+    <include file="classpath:db/changelog/012-add-columns-to-team-board-articles.xml"/>
+
 </databaseChangeLog>

@@ -50,8 +50,8 @@ services:
       # Mail configuration (adjust as needed)
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 587
-      MAIL_USERNAME: your_email@gmail.com
-      MAIL_PASSWORD: your_app_password
+      MAIL_USERNAME: hieunm123.ptit@gmail.com
+      MAIL_PASSWORD: yznf hkso oswy ufmx
       MAIL_SMTP_AUTH: "true"
       MAIL_STARTTLS_ENABLE: "true"
       MAIL_SSL_TRUST: smtp.gmail.com
