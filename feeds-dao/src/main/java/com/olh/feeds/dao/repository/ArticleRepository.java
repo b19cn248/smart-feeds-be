@@ -81,4 +81,16 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<ArticleResponse> findBySourceIdInOrderByPublishDateDesc(
             @Param("sourceIds") List<Long> sourceIds,
             Pageable pageable);
+
+
+
+    @Query("""
+            SELECT at.articleId, t.name
+            FROM ArticleTag at
+            JOIN Tag t ON at.tagId = t.id
+            WHERE at.articleId IN :articleIds
+            AND at.isDeleted = false
+            AND t.isDeleted = false
+            """)
+    List<Object[]> findTagNamesByArticleIds(@Param("articleIds") List<Long> articleIds);
 }

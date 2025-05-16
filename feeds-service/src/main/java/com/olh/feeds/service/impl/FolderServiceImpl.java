@@ -26,10 +26,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,206 +42,75 @@ public class FolderServiceImpl implements FolderService {
     private final ArticleRepository articleRepository;
 
     @Override
-    public PageResponse<FolderResponse> getAllFolders(Long userId, Pageable pageable) {
-        log.info("Getting all folders for user ID: {}", userId);
-
-        // Sử dụng user ID được cung cấp hoặc mặc định nếu null
-        Long effectiveUserId = userId;
-
-        Page<FolderResponse> foldersPage = folderRepository.findAllFolders(effectiveUserId, pageable);
-
-        log.info("Found {} folders", foldersPage.getNumberOfElements());
-        return pageMapper.toPageDto(foldersPage);
-    }
-
-    @Override
-    public PageResponse<FolderResponse> getFoldersByCurrentUser(Pageable pageable) {
-        // Lấy username từ Security Context
-        String username = auditorAware.getCurrentAuditor().get();
-        log.info("Getting folders for current user: {}", username);
-
-        Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
-
-        log.info("Found {} folders for user {}", foldersPage.getNumberOfElements(), username);
-        return pageMapper.toPageDto(foldersPage);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public FolderDetailResponse getFolderDetail(Long folderId) {
-        log.info("Getting folder details for ID: {}", folderId);
-
-        Folder folder = folderRepository.findFolderById(folderId);
-        if (folder == null) {
-            log.error("Folder not found with ID: {}", folderId);
-            throw new NotFoundException(folderId.toString(), "folder");
-        }
-
-        // Lấy danh sách FolderSource
-        List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folderId);
-
-        // Lấy danh sách Source IDs
-        List<Long> sourceIds = folderSources.stream()
-                .map(FolderSource::getSourceId)
-                .collect(Collectors.toList());
-
-        List<SourceResponse> sources = new ArrayList<>();
-        if (!sourceIds.isEmpty()) {
-            // Lấy tất cả các sources từ ID list
-            List<Source> sourceList = sourceRepository.findAllById(sourceIds);
-
-            // Chuyển đổi sang DTO
-            sources = sourceList.stream()
-                    .filter(Objects::nonNull)
-                    .map(this::mapToSourceResponse)
-                    .toList();
-        }
-
-        return FolderDetailResponse.builder()
-                .id(folder.getId())
-                .name(folder.getName())
-                .theme(folder.getTheme())
-                .userId(folder.getUserId())
-                .createdAt(folder.getCreatedAt())
-                .sources(sources)
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public FolderResponse createFolder(FolderRequest request) {
-        log.info("Creating new folder: {}", request.getName());
-
-        if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new BadRequestException("folder.name.required");
-        }
-
-        // Lấy username từ Security Context
-        String username = auditorAware.getCurrentAuditor().get();
-
-        Folder folder = Folder.builder()
-                .name(request.getName())
-                .theme(request.getTheme())
-                .userId(null) // Không cần thiết lập userId vì sẽ dùng createdBy từ auditing
-                .build();
-
-        folder = folderRepository.save(folder);
-        log.info("Folder created successfully with ID: {}", folder.getId());
-
-        return FolderResponse.builder()
-                .id(folder.getId())
-                .name(folder.getName())
-                .theme(folder.getTheme())
-                .userId(folder.getUserId())
-                .createdAt(folder.getCreatedAt())
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public FolderDetailResponse addSourceToFolder(Long folderId, FolderSourceRequest request) {
-        log.info("Adding source ID: {} to folder ID: {}", request.getSourceId(), folderId);
-
-        // Kiểm tra folder tồn tại
-        Folder folder = folderRepository.findFolderById(folderId);
-        if (folder == null) {
-            log.error("Folder not found with ID: {}", folderId);
-            throw new NotFoundException(folderId.toString(), "folder");
-        }
-
-        // Kiểm tra người dùng có quyền truy cập vào folder này không
-        String username = auditorAware.getCurrentAuditor().get();
-        if (!folder.getCreatedBy().equals(username)) {
-            log.error("User {} does not have permission to access folder {}", username, folderId);
-            throw new BadRequestException("folder.access.denied");
-        }
-
-        // Kiểm tra source tồn tại
-        Source source = sourceRepository.findById(request.getSourceId())
-                .orElseThrow(() -> {
-                    log.error("Source not found with ID: {}", request.getSourceId());
-                    return new NotFoundException(request.getSourceId().toString(), "source");
-                });
-
-        // Kiểm tra xem source đã được thêm vào folder chưa
-        boolean exists = folderSourceRepository.existsByFolderIdAndSourceId(folderId, request.getSourceId());
-        if (exists) {
-            log.error("Source already exists in folder");
-            throw new ConflictException("folder.source.already.exists");
-        }
-
-        // Thêm source vào folder
-        FolderSource folderSource = FolderSource.builder()
-                .folderId(folderId)
-                .sourceId(request.getSourceId())
-                .build();
-
-        folderSourceRepository.save(folderSource);
-        log.info("Source added to folder successfully");
-
-        // Trả về folder details đã cập nhật
-        return getFolderDetail(folderId);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize) {
         log.info("Getting folders with articles for current user");
 
-        // Lấy username từ Security Context
         String username = auditorAware.getCurrentAuditor().orElse("system");
         log.info("Current username: {}", username);
 
-        // Lấy danh sách folders của người dùng hiện tại
         Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
-
-        // Chuyển đổi sang danh sách FolderWithArticlesResponse
         List<FolderWithArticlesResponse> folderWithArticles = new ArrayList<>();
 
         for (FolderResponse folder : foldersPage.getContent()) {
-            // Lấy danh sách sources trong folder
             List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folder.getId());
 
             if (folderSources.isEmpty()) {
-                // Nếu không có source nào, tạo folder với danh sách articles rỗng
                 folderWithArticles.add(FolderWithArticlesResponse.builder()
-                        .id(folder.getId())
-                        .name(folder.getName())
-                        .theme(folder.getTheme())
-                        .userId(folder.getUserId())
-                        .createdAt(folder.getCreatedAt())
-                        .articles(Collections.emptyList())
-                        .build());
+                      .id(folder.getId())
+                      .name(folder.getName())
+                      .theme(folder.getTheme())
+                      .userId(folder.getUserId())
+                      .createdAt(folder.getCreatedAt())
+                      .articles(Collections.emptyList())
+                      .build());
                 continue;
             }
 
-            // Lấy danh sách Source IDs
             List<Long> sourceIds = folderSources.stream()
-                    .map(FolderSource::getSourceId)
-                    .collect(Collectors.toList());
+                  .map(FolderSource::getSourceId)
+                  .collect(Collectors.toList());
 
-            // Lấy danh sách articles từ các sources
             List<ArticleResponse> articles = articleRepository.findBySourceIdInOrderByPublishDateDesc(
-                    sourceIds,
-                    PageRequest.of(0, articlePageSize)
+                  sourceIds,
+                  PageRequest.of(0, articlePageSize)
             );
 
-            // Tạo FolderWithArticlesResponse
+            // Lấy hashtag cho các bài viết
+            if (!articles.isEmpty()) {
+                List<Long> articleIds = articles.stream()
+                      .map(ArticleResponse::getId)
+                      .collect(Collectors.toList());
+                List<Object[]> tagResults = articleRepository.findTagNamesByArticleIds(articleIds);
+
+                // Tạo map từ articleId sang danh sách hashtag
+                Map<Long, List<String>> articleTagsMap = new HashMap<>();
+                for (Object[] result : tagResults) {
+                    Long articleId = ((Number) result[0]).longValue();
+                    String tagName = (String) result[1];
+                    articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
+                }
+
+                // Gán hashtag vào ArticleResponse
+                articles.forEach(article -> article.setHashtag(
+                      articleTagsMap.getOrDefault(article.getId(), Collections.emptyList())
+                ));
+            }
+
             folderWithArticles.add(FolderWithArticlesResponse.builder()
-                    .id(folder.getId())
-                    .name(folder.getName())
-                    .theme(folder.getTheme())
-                    .userId(folder.getUserId())
-                    .createdAt(folder.getCreatedAt())
-                    .articles(articles)
-                    .build());
+                  .id(folder.getId())
+                  .name(folder.getName())
+                  .theme(folder.getTheme())
+                  .userId(folder.getUserId())
+                  .createdAt(folder.getCreatedAt())
+                  .articles(articles)
+                  .build());
         }
 
-        // Tạo Page từ danh sách đã chuyển đổi
         Page<FolderWithArticlesResponse> resultPage = new PageImpl<>(
-                folderWithArticles,
-                pageable,
-                foldersPage.getTotalElements()
+              folderWithArticles,
+              pageable,
+              foldersPage.getTotalElements()
         );
 
         return pageMapper.toPageDto(resultPage);
@@ -255,107 +121,205 @@ public class FolderServiceImpl implements FolderService {
     public FolderDetailResponse getFolderArticles(Long folderId, Pageable articlesPageable) {
         log.info("Getting folder details with articles for ID: {}", folderId);
 
-        // Kiểm tra folder tồn tại
         Folder folder = folderRepository.findFolderById(folderId);
         if (folder == null) {
             log.error("Folder not found with ID: {}", folderId);
             throw new NotFoundException(folderId.toString(), "folder");
         }
 
-        // Kiểm tra quyền truy cập
         String username = auditorAware.getCurrentAuditor().orElse("system");
         if (!folder.getCreatedBy().equals(username)) {
             log.error("User {} does not have permission to access folder {}", username, folderId);
             throw new BadRequestException("folder.access.denied");
         }
 
-        // Lấy danh sách sources trong folder
         List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folderId);
         List<SourceResponse> sources = new ArrayList<>();
 
         if (!folderSources.isEmpty()) {
-            // Lấy danh sách Source IDs
             List<Long> sourceIds = folderSources.stream()
-                    .map(FolderSource::getSourceId)
-                    .collect(Collectors.toList());
+                  .map(FolderSource::getSourceId)
+                  .collect(Collectors.toList());
 
-            // Lấy tất cả các sources từ ID list
             List<Source> sourceList = sourceRepository.findAllById(sourceIds);
-
-            // Chuyển đổi sang DTO
             sources = sourceList.stream()
-                    .filter(Objects::nonNull)
-                    .map(source -> SourceResponse.builder()
-                            .id(source.getId())
-                            .url(source.getUrl())
-                            .language(source.getLanguage())
-                            .type(source.getType())
-                            .accountId(source.getAccountId())
-                            .hashtag(source.getHashtag())
-                            .category(source.getCategory())
-                            .userId(source.getUserId())
-                            .active(source.getActive())
-                            .createdAt(source.getCreatedAt())
-                            .build())
-                    .collect(Collectors.toList());
+                  .filter(Objects::nonNull)
+                  .map(this::mapToSourceResponse)
+                  .collect(Collectors.toList());
 
-            // Lấy danh sách articles phân trang
             Page<ArticleResponse> articlesPage = getArticlesBySourceIds(sourceIds, articlesPageable);
 
             return FolderDetailResponse.builder()
-                    .id(folder.getId())
-                    .name(folder.getName())
-                    .theme(folder.getTheme())
-                    .userId(folder.getUserId())
-                    .createdAt(folder.getCreatedAt())
-                    .sources(sources)
-                    .articles(pageMapper.toPageDto(articlesPage))
-                    .build();
+                  .id(folder.getId())
+                  .name(folder.getName())
+                  .theme(folder.getTheme())
+                  .userId(folder.getUserId())
+                  .createdAt(folder.getCreatedAt())
+                  .sources(sources)
+                  .articles(pageMapper.toPageDto(articlesPage))
+                  .build();
         }
 
-        // Nếu không có source nào
         return FolderDetailResponse.builder()
-                .id(folder.getId())
-                .name(folder.getName())
-                .theme(folder.getTheme())
-                .userId(folder.getUserId())
-                .createdAt(folder.getCreatedAt())
-                .sources(Collections.emptyList())
-                .articles(new PageResponse<>())
-                .build();
+              .id(folder.getId())
+              .name(folder.getName())
+              .theme(folder.getTheme())
+              .userId(folder.getUserId())
+              .createdAt(folder.getCreatedAt())
+              .sources(Collections.emptyList())
+              .articles(new PageResponse<>())
+              .build();
     }
 
-    /**
-     * Helper method để lấy articles từ danh sách source IDs với phân trang
-     */
     private Page<ArticleResponse> getArticlesBySourceIds(List<Long> sourceIds, Pageable pageable) {
-        // Tổng số articles
         int totalArticles = articleRepository.countBySourceIdIn(sourceIds);
-
-        // Lấy danh sách articles theo phân trang
         List<ArticleResponse> articles = articleRepository.findBySourceIdInOrderByPublishDateDesc(
-                sourceIds,
-                pageable
+              sourceIds,
+              pageable
         );
+
+        // Lấy hashtag cho các bài viết
+        if (!articles.isEmpty()) {
+            List<Long> articleIds = articles.stream()
+                  .map(ArticleResponse::getId)
+                  .collect(Collectors.toList());
+            List<Object[]> tagResults = articleRepository.findTagNamesByArticleIds(articleIds);
+
+            // Tạo map từ articleId sang danh sách hashtag
+            Map<Long, List<String>> articleTagsMap = new HashMap<>();
+            for (Object[] result : tagResults) {
+                Long articleId = ((Number) result[0]).longValue();
+                String tagName = (String) result[1];
+                articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
+            }
+
+            // Gán hashtag vào ArticleResponse
+            articles.forEach(article -> article.setHashtag(
+                  articleTagsMap.getOrDefault(article.getId(), Collections.emptyList())
+            ));
+        }
 
         return new PageImpl<>(articles, pageable, totalArticles);
     }
 
-    /**
-     * Map Source entity to SourceResponse DTO
-     */
+    // Các phương thức khác giữ nguyên
+    @Override
+    public PageResponse<FolderResponse> getAllFolders(Long userId, Pageable pageable) {
+        log.info("Getting all folders for user ID: {}", userId);
+        Long effectiveUserId = userId;
+        Page<FolderResponse> foldersPage = folderRepository.findAllFolders(effectiveUserId, pageable);
+        log.info("Found {} folders", foldersPage.getNumberOfElements());
+        return pageMapper.toPageDto(foldersPage);
+    }
+
+    @Override
+    public PageResponse<FolderResponse> getFoldersByCurrentUser(Pageable pageable) {
+        String username = auditorAware.getCurrentAuditor().get();
+        log.info("Getting folders for current user: {}", username);
+        Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
+        log.info("Found {} folders for user {}", foldersPage.getNumberOfElements(), username);
+        return pageMapper.toPageDto(foldersPage);
+    }
+
+    @Override
+    public FolderDetailResponse getFolderDetail(Long folderId) {
+            log.info("Getting folder details for ID: {}", folderId);
+            Folder folder = folderRepository.findFolderById(folderId);
+            if (folder == null) {
+                log.error("Folder not found with ID: {}", folderId);
+                throw new NotFoundException(folderId.toString(), "folder");
+            }
+            List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folderId);
+            List<Long> sourceIds = folderSources.stream()
+                  .map(FolderSource::getSourceId)
+                  .collect(Collectors.toList());
+            List<SourceResponse> sources = new ArrayList<>();
+            if (!sourceIds.isEmpty()) {
+                List<Source> sourceList = sourceRepository.findAllById(sourceIds);
+                sources = sourceList.stream()
+                      .filter(Objects::nonNull)
+                      .map(this::mapToSourceResponse)
+                      .toList();
+            }
+            return FolderDetailResponse.builder()
+                  .id(folder.getId())
+                  .name(folder.getName())
+                  .theme(folder.getTheme())
+                  .userId(folder.getUserId())
+                  .createdAt(folder.getCreatedAt())
+                  .sources(sources)
+                  .build();    }
+
+
+    @Override
+    @Transactional
+    public FolderResponse createFolder(FolderRequest request) {
+        log.info("Creating new folder: {}", request.getName());
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new BadRequestException("folder.name.required");
+        }
+        String username = auditorAware.getCurrentAuditor().get();
+        Folder folder = Folder.builder()
+              .name(request.getName())
+              .theme(request.getTheme())
+              .userId(null)
+              .build();
+        folder = folderRepository.save(folder);
+        log.info("Folder created successfully with ID: {}", folder.getId());
+        return FolderResponse.builder()
+              .id(folder.getId())
+              .name(folder.getName())
+              .theme(folder.getTheme())
+              .userId(folder.getUserId())
+              .createdAt(folder.getCreatedAt())
+              .build();
+    }
+
+    @Override
+    @Transactional
+    public FolderDetailResponse addSourceToFolder(Long folderId, FolderSourceRequest request) {
+        log.info("Adding source ID: {} to folder ID: {}", request.getSourceId(), folderId);
+        Folder folder = folderRepository.findFolderById(folderId);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", folderId);
+            throw new NotFoundException(folderId.toString(), "folder");
+        }
+        String username = auditorAware.getCurrentAuditor().get();
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to access folder {}", username, folderId);
+            throw new BadRequestException("folder.access.denied");
+        }
+        Source source = sourceRepository.findById(request.getSourceId())
+              .orElseThrow(() -> {
+                  log.error("Source not found with ID: {}", request.getSourceId());
+                  return new NotFoundException(request.getSourceId().toString(), "source");
+              });
+        boolean exists = folderSourceRepository.existsByFolderIdAndSourceId(folderId, request.getSourceId());
+        if (exists) {
+            log.error("Source already exists in folder");
+            throw new ConflictException("folder.source.already.exists");
+        }
+        FolderSource folderSource = FolderSource.builder()
+              .folderId(folderId)
+              .sourceId(request.getSourceId())
+              .build();
+        folderSourceRepository.save(folderSource);
+        log.info("Source added to folder successfully");
+        return getFolderDetail(folderId);
+    }
+
     private SourceResponse mapToSourceResponse(Source source) {
         return SourceResponse.builder()
-                .id(source.getId())
-                .url(source.getUrl())
-                .language(source.getLanguage())
-                .type(source.getType())
-                .accountId(source.getAccountId())
-                .hashtag(source.getHashtag())
-                .category(source.getCategory())
-                .userId(source.getUserId())
-                .active(source.getActive())
-                .createdAt(source.getCreatedAt())
-                .build();
+              .id(source.getId())
+              .url(source.getUrl())
+              .language(source.getLanguage())
+              .type(source.getType())
+              .accountId(source.getAccountId())
+              .hashtag(source.getHashtag())
+              .category(source.getCategory())
+              .userId(source.getUserId())
+              .active(source.getActive())
+              .createdAt(source.getCreatedAt())
+              .build();
     }
 }
