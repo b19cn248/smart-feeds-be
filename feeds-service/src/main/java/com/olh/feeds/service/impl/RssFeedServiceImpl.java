@@ -294,7 +294,7 @@ public class RssFeedServiceImpl implements RssFeedService {
         String enclosureUrl = this.extractImageFromContent(request.getContent());
 
         if (enclosureUrl.isBlank()) {
-            enclosureUrl = this.extractSourceUrl(request.getContentEncoded());
+            enclosureUrl = this.extractImageFromContent(request.getContentEncoded());
         }
 
         Article article = Article.builder()
