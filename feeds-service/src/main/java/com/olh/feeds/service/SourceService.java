@@ -2,6 +2,7 @@
 package com.olh.feeds.service;
 
 import com.olh.feeds.dto.response.PageResponse;
+import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.dto.response.source.SourceResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -13,4 +14,6 @@ public interface SourceService {
      * @return Paginated list of sources
      */
     PageResponse<SourceResponse> getAllSources(Boolean active, Pageable pageable);
+
+    SourceArticlesResponse getSourceWithArticles(Long sourceId, Pageable pageable);
 }

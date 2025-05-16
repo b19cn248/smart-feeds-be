@@ -107,7 +107,7 @@ public class TeamBoardController {
      * Delete team board
      */
     @DeleteMapping("/{id}")
-    public ResponseGeneral<?> deleteTeamBoard(
+    public ResponseGeneral<Void> deleteTeamBoard(
             @PathVariable("id") Long id
     ) {
         log.info("REST request to delete team board ID: {}", id);
@@ -155,7 +155,7 @@ public class TeamBoardController {
      * Remove team board member
      */
     @DeleteMapping("/{id}/members/{userId}")
-    public ResponseGeneral<?> removeTeamBoardMember(
+    public ResponseGeneral<Void> removeTeamBoardMember(
             @PathVariable("id") Long id,
             @PathVariable("userId") Long userId
     ) {
@@ -187,7 +187,7 @@ public class TeamBoardController {
      * Remove article from team board
      */
     @DeleteMapping("/{id}/articles/{articleId}")
-    public ResponseGeneral<?> removeArticleFromTeamBoard(
+    public ResponseGeneral<Void> removeArticleFromTeamBoard(
             @PathVariable("id") Long id,
             @PathVariable("articleId") Long articleId
     ) {

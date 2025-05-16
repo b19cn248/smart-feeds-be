@@ -2,6 +2,7 @@ package com.olh.feeds.api.controller;
 
 import com.olh.feeds.core.exception.response.ResponseGeneral;
 import com.olh.feeds.dto.response.PageResponse;
+import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.dto.response.source.SourceResponse;
 import com.olh.feeds.service.SourceService;
 import lombok.RequiredArgsConstructor;
@@ -9,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/sources")
@@ -47,5 +45,26 @@ public class SourceController {
             log.error("Error retrieving sources", e);
             throw e;
         }
+    }
+
+
+    /**
+     * Lấy chi tiết source và danh sách articles của source đó
+     *
+     * @param sourceId ID của source
+     * @param pageable Thông tin phân trang cho articles
+     * @return Thông tin chi tiết source và danh sách articles
+     */
+    @GetMapping("/{sourceId}/articles")
+    public ResponseGeneral<SourceArticlesResponse> getSourceWithArticles(
+            @PathVariable("sourceId") Long sourceId,
+            @PageableDefault Pageable pageable
+    ) {
+        log.info("REST request to get source and its articles for ID: {}", sourceId);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "source.articles.success",
+                sourceService.getSourceWithArticles(sourceId, pageable)
+        );
     }
 }
