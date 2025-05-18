@@ -52,11 +52,11 @@ public interface TeamUserRepository extends JpaRepository<TeamUser, Long> {
         SELECT COUNT(tu) > 0
         FROM TeamUser tu
         JOIN User u ON tu.userId = u.id
-        WHERE tu.teamId = :teamId AND u.email = :email AND tu.isDeleted = false
+        WHERE tu.teamId = :teamId AND u.username = :username AND tu.isDeleted = false
         """)
     boolean existsByTeamIdAndUserEmail(
             @Param("teamId") Long teamId,
-            @Param("email") String email
+            @Param("username") String username
     );
 
     @Query("""
