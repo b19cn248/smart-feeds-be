@@ -86,7 +86,7 @@ public class FolderServiceImpl implements FolderService {
                 // Tạo map từ articleId sang danh sách hashtag
                 Map<Long, List<String>> articleTagsMap = new HashMap<>();
                 for (Object[] result : tagResults) {
-                    Long articleId = ((Number) result[0]).longValue();
+                    Long articleId = (Long) ((Number) result[0]).longValue();
                     String tagName = (String) result[1];
                     articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
                 }
@@ -188,7 +188,7 @@ public class FolderServiceImpl implements FolderService {
             // Tạo map từ articleId sang danh sách hashtag
             Map<Long, List<String>> articleTagsMap = new HashMap<>();
             for (Object[] result : tagResults) {
-                Long articleId = ((Number) result[0]).longValue();
+                Long articleId = (Long) ((Number) result[0]).longValue();
                 String tagName = (String) result[1];
                 articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
             }
@@ -208,7 +208,6 @@ public class FolderServiceImpl implements FolderService {
         log.info("Getting all folders for user ID: {}", userId);
         Long effectiveUserId = userId;
         Page<FolderResponse> foldersPage = folderRepository.findAllFolders(effectiveUserId, pageable);
-        log.info("Found {} folders", foldersPage.getNumberOfElements());
         return pageMapper.toPageDto(foldersPage);
     }
 
@@ -217,7 +216,6 @@ public class FolderServiceImpl implements FolderService {
         String username = auditorAware.getCurrentAuditor().get();
         log.info("Getting folders for current user: {}", username);
         Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
-        log.info("Found {} folders for user {}", foldersPage.getNumberOfElements(), username);
         return pageMapper.toPageDto(foldersPage);
     }
 
