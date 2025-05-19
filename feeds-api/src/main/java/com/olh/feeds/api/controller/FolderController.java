@@ -132,14 +132,15 @@ public class FolderController {
      */
     @GetMapping("/with-articles")
     public ResponseGeneral<PageResponse<FolderWithArticlesResponse>> getFoldersWithArticles(
-            @PageableDefault Pageable pageable,
-            @RequestParam(name = "article_size", defaultValue = "5") int articleSize
+          @PageableDefault Pageable pageable,
+          @RequestParam(name = "article_size", defaultValue = "5") int articleSize,
+          @RequestParam(name = "keyword", required = false) String keyword
     ) {
-        log.info("REST request to get folders with articles for current user");
+        log.info("REST request to get folders with articles for current user, keyword: {}", keyword);
         return ResponseGeneral.of(
-                HttpStatus.OK.value(),
-                "folder.with.articles.success",
-                folderService.getFoldersWithArticles(pageable, articleSize)
+              HttpStatus.OK.value(),
+              "folder.with.articles.success",
+              folderService.getFoldersWithArticles(pageable, articleSize, keyword)
         );
     }
 

@@ -43,14 +43,17 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize) {
-        log.info("Getting folders with articles for current user");
+    public PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize, String keyword) {
+        log.info("Getting folders with articles for current user, keyword: {}", keyword);
 
         String username = auditorAware.getCurrentAuditor().orElse("system");
         log.info("Current username: {}", username);
 
         Page<FolderResponse> foldersPage = folderRepository.findByCreatedBy(username, pageable);
         List<FolderWithArticlesResponse> folderWithArticles = new ArrayList<>();
+
+        // Use keyword directly as a String (null if not provided or empty)
+        String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword : null;
 
         for (FolderResponse folder : foldersPage.getContent()) {
             List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folder.getId());
@@ -71,8 +74,9 @@ public class FolderServiceImpl implements FolderService {
                   .map(FolderSource::getSourceId)
                   .collect(Collectors.toList());
 
-            List<ArticleResponse> articles = articleRepository.findBySourceIdInOrderByPublishDateDesc(
+            List<ArticleResponse> articles = articleRepository.findBySourceIdInAndKeywordOrderByPublishDateDesc(
                   sourceIds,
+                  searchKeyword,
                   PageRequest.of(0, articlePageSize)
             );
 
@@ -86,7 +90,7 @@ public class FolderServiceImpl implements FolderService {
                 // Tạo map từ articleId sang danh sách hashtag
                 Map<Long, List<String>> articleTagsMap = new HashMap<>();
                 for (Object[] result : tagResults) {
-                    Long articleId = (Long) ((Number) result[0]).longValue();
+                    Long articleId = ((Number) result[0]).longValue();
                     String tagName = (String) result[1];
                     articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
                 }
@@ -173,8 +177,9 @@ public class FolderServiceImpl implements FolderService {
 
     private Page<ArticleResponse> getArticlesBySourceIds(List<Long> sourceIds, Pageable pageable) {
         int totalArticles = articleRepository.countBySourceIdIn(sourceIds);
-        List<ArticleResponse> articles = articleRepository.findBySourceIdInOrderByPublishDateDesc(
+        List<ArticleResponse> articles = articleRepository.findBySourceIdInAndKeywordOrderByPublishDateDesc(
               sourceIds,
+              null,
               pageable
         );
 
@@ -188,7 +193,7 @@ public class FolderServiceImpl implements FolderService {
             // Tạo map từ articleId sang danh sách hashtag
             Map<Long, List<String>> articleTagsMap = new HashMap<>();
             for (Object[] result : tagResults) {
-                Long articleId = (Long) ((Number) result[0]).longValue();
+                Long articleId = ((Number) result[0]).longValue();
                 String tagName = (String) result[1];
                 articleTagsMap.computeIfAbsent(articleId, k -> new ArrayList<>()).add(tagName);
             }
@@ -202,7 +207,6 @@ public class FolderServiceImpl implements FolderService {
         return new PageImpl<>(articles, pageable, totalArticles);
     }
 
-    // Các phương thức khác giữ nguyên
     @Override
     public PageResponse<FolderResponse> getAllFolders(Long userId, Pageable pageable) {
         log.info("Getting all folders for user ID: {}", userId);
@@ -221,33 +225,33 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public FolderDetailResponse getFolderDetail(Long folderId) {
-            log.info("Getting folder details for ID: {}", folderId);
-            Folder folder = folderRepository.findFolderById(folderId);
-            if (folder == null) {
-                log.error("Folder not found with ID: {}", folderId);
-                throw new NotFoundException(folderId.toString(), "folder");
-            }
-            List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folderId);
-            List<Long> sourceIds = folderSources.stream()
-                  .map(FolderSource::getSourceId)
-                  .collect(Collectors.toList());
-            List<SourceResponse> sources = new ArrayList<>();
-            if (!sourceIds.isEmpty()) {
-                List<Source> sourceList = sourceRepository.findAllById(sourceIds);
-                sources = sourceList.stream()
-                      .filter(Objects::nonNull)
-                      .map(this::mapToSourceResponse)
-                      .toList();
-            }
-            return FolderDetailResponse.builder()
-                  .id(folder.getId())
-                  .name(folder.getName())
-                  .theme(folder.getTheme())
-                  .userId(folder.getUserId())
-                  .createdAt(folder.getCreatedAt())
-                  .sources(sources)
-                  .build();    }
-
+        log.info("Getting folder details for ID: {}", folderId);
+        Folder folder = folderRepository.findFolderById(folderId);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", folderId);
+            throw new NotFoundException(folderId.toString(), "folder");
+        }
+        List<FolderSource> folderSources = folderSourceRepository.findByFolderId(folderId);
+        List<Long> sourceIds = folderSources.stream()
+              .map(FolderSource::getSourceId)
+              .collect(Collectors.toList());
+        List<SourceResponse> sources = new ArrayList<>();
+        if (!sourceIds.isEmpty()) {
+            List<Source> sourceList = sourceRepository.findAllById(sourceIds);
+            sources = sourceList.stream()
+                  .filter(Objects::nonNull)
+                  .map(this::mapToSourceResponse)
+                  .toList();
+        }
+        return FolderDetailResponse.builder()
+              .id(folder.getId())
+              .name(folder.getName())
+              .theme(folder.getTheme())
+              .userId(folder.getUserId())
+              .createdAt(folder.getCreatedAt())
+              .sources(sources)
+              .build();
+    }
 
     @Override
     @Transactional
