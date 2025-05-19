@@ -59,23 +59,26 @@ public class GeminiServiceImpl implements GeminiService {
             // Get the response
             GeminiResponseDto geminiResponse = response.getBody();
 
-            // Set overLimit flag
+            // Set overLimit flag and original prompt
             if (geminiResponse != null) {
                 geminiResponse.setOverLimit(false);
+                geminiResponse.setOriginalPrompt(request.getPrompt());
             }
 
             return geminiResponse;
         } catch (HttpClientErrorException.TooManyRequests ex) {
             log.error("Rate limit exceeded for Gemini API", ex);
-            // Create a response with overLimit=true
+            // Create a response with overLimit=true and include the original prompt
             return GeminiResponseDto.builder()
                     .overLimit(true)
+                    .originalPrompt(request.getPrompt())
                     .build();
         } catch (Exception ex) {
             log.error("Error calling Gemini API", ex);
-            // Create a response with overLimit=true for any other error
+            // Create a response with overLimit=true for any other error and include the original prompt
             return GeminiResponseDto.builder()
                     .overLimit(true)
+                    .originalPrompt(request.getPrompt())
                     .build();
         }
     }

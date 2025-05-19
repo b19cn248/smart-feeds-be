@@ -19,4 +19,5 @@ public class GeminiResponseDto {
     private UsageMetadataDto usageMetadata;
     private String modelVersion;
     private boolean overLimit;
+    private String originalPrompt;
 }
