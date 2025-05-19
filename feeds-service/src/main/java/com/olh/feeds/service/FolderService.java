@@ -52,7 +52,7 @@ public interface FolderService {
      * @param articlePageSize Number of articles per folder
      * @return List of folders with articles
      */
-    PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize);
+    PageResponse<FolderWithArticlesResponse> getFoldersWithArticles(Pageable pageable, int articlePageSize, String keyword);
 
     /**
      * Get folder details with paginated articles
