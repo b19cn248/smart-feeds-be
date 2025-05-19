@@ -35,6 +35,10 @@
     {
       "path": "/api/v1/users/*",
       "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/api/v1/gemini/generate",
+      "enforcement-mode": "DISABLED"
     }
   ]
 }
