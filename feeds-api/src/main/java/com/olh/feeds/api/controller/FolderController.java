@@ -124,9 +124,9 @@ public class FolderController {
     }
 
     /**
-     * Thêm source vào folder
+     * Thêm nhiều source vào folder
      * @param id Folder ID
-     * @param request Source to add
+     * @param request Danh sách source IDs cần thêm
      * @return Thông tin folder đã cập nhật
      */
     @PostMapping("/{id}/sources")
@@ -134,7 +134,7 @@ public class FolderController {
             @PathVariable("id") Long id,
             @Valid @RequestBody FolderSourceRequest request
     ) {
-        log.info("REST request to add source ID: {} to folder ID: {}", request.getSourceId(), id);
+        log.info("REST request to add {} sources to folder ID: {}", request.getSourceIds().size(), id);
 
         FolderDetailResponse folder = folderService.addSourceToFolder(id, request);
         return ResponseGeneral.of(
