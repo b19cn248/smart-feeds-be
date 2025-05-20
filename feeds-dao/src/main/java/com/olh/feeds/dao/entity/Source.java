@@ -18,6 +18,9 @@ public class Source extends BaseEntity {
     @Column(name = "language")
     private String language;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "type")
     private String type;
 
@@ -26,9 +29,6 @@ public class Source extends BaseEntity {
 
     @Column(name = "hashtag")
     private String hashtag;
-
-    @Column(name = "category")
-    private String category;
 
     @Column(name = "user_id")
     private Long userId;

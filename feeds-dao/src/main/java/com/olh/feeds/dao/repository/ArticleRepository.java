@@ -33,10 +33,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT s FROM Source s WHERE s.url = :url and s.isDeleted = false")
     List<Source> findAllByUrl(@Param("url") String url);
 
-    @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(s.id, s.url, s.type, s.active) " +
-           "FROM Source s WHERE s.id = :id AND s.isDeleted = false")
-    SourceResponse findSourceById(@Param("id") Long id);
-
     @Query("SELECT a FROM Article a WHERE a.link = :link AND a.isDeleted = false")
     Optional<Article> findByLink(String link);
 

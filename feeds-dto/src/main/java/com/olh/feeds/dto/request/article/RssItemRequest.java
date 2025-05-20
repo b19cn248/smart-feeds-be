@@ -50,5 +50,7 @@ public class RssItemRequest {
 
     private List<String> hashtag;
 
-    private List<String> categories;
+    private String sourceName;
+    private String sourceLink;
+    private List<String> category;
 }

@@ -318,7 +318,6 @@ public class FolderServiceImpl implements FolderService {
               .type(source.getType())
               .accountId(source.getAccountId())
               .hashtag(source.getHashtag())
-              .category(source.getCategory())
               .userId(source.getUserId())
               .active(source.getActive())
               .createdAt(source.getCreatedAt())

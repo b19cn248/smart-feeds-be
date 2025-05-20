@@ -21,7 +21,6 @@ public class SourceResponse {
     private String type;
     private String accountId;
     private String hashtag;
-    private String category;
     private Long userId;
     private Boolean active;
     private LocalDateTime createdAt;

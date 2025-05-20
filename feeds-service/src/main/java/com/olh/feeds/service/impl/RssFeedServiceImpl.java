@@ -2,14 +2,8 @@ package com.olh.feeds.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.olh.feeds.core.exception.base.BadRequestException;
-import com.olh.feeds.dao.entity.Article;
-import com.olh.feeds.dao.entity.ArticleTag;
-import com.olh.feeds.dao.entity.Source;
-import com.olh.feeds.dao.entity.Tag;
-import com.olh.feeds.dao.repository.ArticleRepository;
-import com.olh.feeds.dao.repository.ArticleTagRepository;
-import com.olh.feeds.dao.repository.SourceRepository;
-import com.olh.feeds.dao.repository.TagRepository;
+import com.olh.feeds.dao.entity.*;
+import com.olh.feeds.dao.repository.*;
 import com.olh.feeds.dto.request.article.RssFeedRequest;
 import com.olh.feeds.dto.request.article.RssItemRequest;
 import com.olh.feeds.dto.response.article.ArticleResponse;
@@ -36,6 +30,8 @@ public class RssFeedServiceImpl implements RssFeedService {
     private final SourceRepository sourceRepository;
     private final TagRepository tagRepository;
     private final ArticleTagRepository articleTagRepository;
+    private final CategoryRepository categoryRepository;
+    private final SourceCategoryRepository sourceCategoryRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -63,7 +59,14 @@ public class RssFeedServiceImpl implements RssFeedService {
                     continue;
                 }
 
+                // Tìm hoặc tạo source với các trường mới
                 Source source = findOrCreateSource(item);
+
+                // Xử lý danh mục cho source
+                if (item.getCategory() != null && !item.getCategory().isEmpty()) {
+                    processCategories(source, item.getCategory());
+                }
+
                 Article article = createArticleFromRequest(item, source.getId());
                 article.setGuid(normalizedGuid);
                 article.setLink(normalizedLink);
@@ -250,9 +253,17 @@ public class RssFeedServiceImpl implements RssFeedService {
     }
 
     private Source findOrCreateSource(RssItemRequest item) {
-        String sourceUrl = extractSourceUrl(item.getLink());
-        log.debug("Finding or creating source for URL: {}", sourceUrl);
+        // Sử dụng sourceLink nếu có, nếu không thì trích xuất từ link
+        String sourceUrl = item.getSourceLink() != null && !item.getSourceLink().isEmpty()
+                ? item.getSourceLink()
+                : extractSourceUrl(item.getLink());
 
+        // Sử dụng sourceName nếu có, nếu không thì trích xuất từ URL
+        String sourceName = item.getSourceName() != null && !item.getSourceName().isEmpty()
+                ? item.getSourceName()
+                : extractSourceName(sourceUrl);
+
+        log.debug("Finding or creating source for URL: {} with name: {}", sourceUrl, sourceName);
         List<Source> sources = sourceRepository.findAllByUrl(sourceUrl);
         if (!sources.isEmpty()) {
             Source source = sources.stream()
@@ -260,18 +271,141 @@ public class RssFeedServiceImpl implements RssFeedService {
                     .sorted((s1, s2) -> s2.getCreatedAt().compareTo(s1.getCreatedAt()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("No non-deleted source found for URL: " + sourceUrl));
-            log.info("Found existing source with URL: {} and ID: {}", sourceUrl, source.getId());
+
+            // Cập nhật tên nguồn nếu có thay đổi
+            if (!Objects.equals(source.getName(), sourceName)) {
+                source.setName(sourceName);
+                source = sourceRepository.save(source);
+                log.info("Updated name for existing source with URL: {} to: {}", sourceUrl, sourceName);
+            }
+
             return source;
         }
-
-        log.info("No source found for URL: {}. Creating new source.", sourceUrl);
+        log.info("No source found for URL: {}. Creating new source with name: {}", sourceUrl, sourceName);
         Source newSource = Source.builder()
                 .url(sourceUrl)
+                .name(sourceName)
                 .type("RSS")
                 .active(true)
                 .userId(1L)
                 .build();
         return sourceRepository.save(newSource);
+    }
+
+    /**
+     * Xử lý danh mục cho nguồn tin
+     */
+    private void processCategories(Source source, List<String> categoryNames) {
+        log.info("Processing {} categories for source: {}", categoryNames.size(), source.getName());
+
+        if (categoryNames == null || categoryNames.isEmpty()) {
+            return;
+        }
+
+        // Chuẩn hóa tên danh mục
+        List<String> normalizedCategories = categoryNames.stream()
+                .map(this::normalizeCategory)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (normalizedCategories.isEmpty()) {
+            log.warn("No valid categories after normalization for source: {}", source.getName());
+            return;
+        }
+
+        // Tìm danh mục đã tồn tại
+        List<Category> existingCategories = categoryRepository.findAllByNameIn(normalizedCategories);
+        Map<String, Category> categoryMap = existingCategories.stream()
+                .collect(Collectors.toMap(Category::getName, c -> c));
+
+        // Tạo mới danh mục chưa tồn tại
+        List<Category> newCategories = new ArrayList<>();
+        for (String categoryName : normalizedCategories) {
+            if (!categoryMap.containsKey(categoryName)) {
+                Category newCategory = Category.builder()
+                        .name(categoryName)
+                        .description("Auto-created from RSS feed")
+                        .build();
+                newCategories.add(newCategory);
+                log.debug("Creating new category: {}", categoryName);
+            }
+        }
+
+        if (!newCategories.isEmpty()) {
+            List<Category> savedCategories = categoryRepository.saveAll(newCategories);
+            savedCategories.forEach(c -> categoryMap.put(c.getName(), c));
+            log.info("Created {} new categories", savedCategories.size());
+        }
+
+        // Tạo liên kết giữa source và danh mục
+        List<SourceCategory> sourceCategoriesToSave = new ArrayList<>();
+        for (String categoryName : normalizedCategories) {
+            Category category = categoryMap.get(categoryName);
+            if (category != null) {
+                if (!sourceCategoryRepository.existsBySourceIdAndCategoryId(source.getId(), category.getId())) {
+                    SourceCategory sourceCategory = SourceCategory.builder()
+                            .sourceId(source.getId())
+                            .categoryId(category.getId())
+                            .build();
+                    sourceCategoriesToSave.add(sourceCategory);
+                    log.debug("Linking source: {} to category: {}", source.getName(), category.getName());
+                }
+            }
+        }
+
+        if (!sourceCategoriesToSave.isEmpty()) {
+            sourceCategoryRepository.saveAll(sourceCategoriesToSave);
+            log.info("Created {} source-category associations for source: {}",
+                    sourceCategoriesToSave.size(), source.getName());
+        }
+    }
+
+    /**
+     * Chuẩn hóa tên danh mục
+     */
+    private String normalizeCategory(String category) {
+        if (category == null || category.trim().isEmpty()) {
+            return null;
+        }
+
+        // Chuẩn hóa đơn giản: trim, lowercase
+        String normalized = category.trim().toLowerCase();
+
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        return normalized;
+    }
+
+    /**
+     * Trích xuất tên nguồn từ URL
+     */
+    private String extractSourceName(String url) {
+        if (url == null || url.isEmpty()) {
+            return "Unknown Source";
+        }
+
+        try {
+            java.net.URL parsedUrl = new java.net.URL(url);
+            String host = parsedUrl.getHost();
+
+            // Loại bỏ tiền tố phổ biến như www.
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+
+            // Chuyển đổi domain thành title case (e.g., example.com -> Example.com)
+            if (!host.isEmpty()) {
+                host = Character.toUpperCase(host.charAt(0)) + host.substring(1);
+            }
+
+            return host;
+        } catch (Exception e) {
+            log.warn("Failed to extract source name from URL: {}", url, e);
+            return url;
+        }
     }
 
     private String extractSourceUrl(String link) {
