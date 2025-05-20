@@ -278,6 +278,11 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public FolderResponse updateFolder(Long id, FolderRequest request) {
+        return null;
+    }
+
+    @Override
     @Transactional
     public FolderDetailResponse addSourceToFolder(Long folderId, FolderSourceRequest request) {
         log.info("Adding source ID: {} to folder ID: {}", request.getSourceId(), folderId);

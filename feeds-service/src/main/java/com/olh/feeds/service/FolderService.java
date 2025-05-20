@@ -38,6 +38,14 @@ public interface FolderService {
      */
     FolderResponse createFolder(FolderRequest request);
 
+
+    /**
+     * Create a new folder
+     * @param request Folder creation request
+     * @return Created folder
+     */
+    FolderResponse updateFolder(Long id, FolderRequest request);
+
     /**
      * Add a source to a folder
      * @param folderId Folder ID 

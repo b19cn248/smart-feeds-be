@@ -102,6 +102,27 @@ public class FolderController {
         );
     }
 
+
+    /**
+     * Chỉnh sửa folder
+     * @param request Folder creation request
+     * @return Created folder
+     */
+    @PutMapping("/{id}")
+    public ResponseGeneral<FolderResponse> updateFolder(
+          @PathVariable("id") Long id,
+          @Valid @RequestBody FolderRequest request
+    ) {
+        log.info("REST request to update folder: {}", request.getName());
+
+        FolderResponse folder = folderService.update(id, request);
+        return ResponseGeneral.of(
+              HttpStatus.CREATED.value(),
+              "folder.create.success",
+              folder
+        );
+    }
+
     /**
      * Thêm source vào folder
      * @param id Folder ID
