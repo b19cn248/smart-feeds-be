@@ -278,8 +278,33 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    @Transactional
     public FolderResponse updateFolder(Long id, FolderRequest request) {
-        return null;
+        log.info("Updating folder with ID: {}", id);
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new BadRequestException("folder.name.required");
+        }
+        Folder folder = folderRepository.findFolderById(id);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", id);
+            throw new NotFoundException(id.toString(), "folder");
+        }
+        String username = auditorAware.getCurrentAuditor().orElse("system");
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to update folder {}", username, id);
+            throw new BadRequestException("folder.access.denied");
+        }
+        folder.setName(request.getName());
+        folder.setTheme(request.getTheme());
+        folder = folderRepository.save(folder);
+        log.info("Folder updated successfully with ID: {}", folder.getId());
+        return FolderResponse.builder()
+                .id(folder.getId())
+                .name(folder.getName())
+                .theme(folder.getTheme())
+                .userId(folder.getUserId())
+                .createdAt(folder.getCreatedAt())
+                .build();
     }
 
     @Override
@@ -312,6 +337,40 @@ public class FolderServiceImpl implements FolderService {
               .build();
         folderSourceRepository.save(folderSource);
         log.info("Source added to folder successfully");
+        return getFolderDetail(folderId);
+    }
+
+    @Override
+    @Transactional
+    public FolderDetailResponse removeSourceFromFolder(Long folderId, Long sourceId) {
+        log.info("Removing source ID: {} from folder ID: {}", sourceId, folderId);
+
+        // Kiểm tra folder tồn tại
+        Folder folder = folderRepository.findFolderById(folderId);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", folderId);
+            throw new NotFoundException(folderId.toString(), "folder");
+        }
+
+        // Kiểm tra quyền truy cập
+        String username = auditorAware.getCurrentAuditor().orElse("system");
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to access folder {}", username, folderId);
+            throw new BadRequestException("folder.access.denied");
+        }
+
+        // Kiểm tra source tồn tại trong folder
+        boolean exists = folderSourceRepository.existsByFolderIdAndSourceId(folderId, sourceId);
+        if (!exists) {
+            log.error("Source ID: {} does not exist in folder ID: {}", sourceId, folderId);
+            throw new NotFoundException("folder.source.not.found");
+        }
+
+        // Xóa source khỏi folder
+        folderSourceRepository.deleteByFolderIdAndSourceId(folderId, sourceId);
+        log.info("Successfully removed source ID: {} from folder ID: {}", sourceId, folderId);
+
+        // Trả về thông tin folder sau khi xóa
         return getFolderDetail(folderId);
     }
 

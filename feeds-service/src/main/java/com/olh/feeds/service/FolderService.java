@@ -69,4 +69,12 @@ public interface FolderService {
      * @return Folder with paginated articles
      */
     FolderDetailResponse getFolderArticles(Long folderId, Pageable articlesPageable);
+
+    /**
+     * Xóa source khỏi folder
+     * @param folderId Folder ID
+     * @param sourceId Source ID cần xóa
+     * @return Thông tin folder sau khi xóa source
+     */
+    FolderDetailResponse removeSourceFromFolder(Long folderId, Long sourceId);
 }

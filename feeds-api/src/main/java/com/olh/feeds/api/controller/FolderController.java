@@ -115,7 +115,7 @@ public class FolderController {
     ) {
         log.info("REST request to update folder: {}", request.getName());
 
-        FolderResponse folder = folderService.update(id, request);
+        FolderResponse folder = folderService.updateFolder(id, request);
         return ResponseGeneral.of(
               HttpStatus.CREATED.value(),
               "folder.create.success",
@@ -182,6 +182,27 @@ public class FolderController {
                 HttpStatus.OK.value(),
                 "folder.articles.success",
                 folderService.getFolderArticles(id, articlesPageable)
+        );
+    }
+
+    /**
+     * Xóa source khỏi folder
+     * @param id Folder ID
+     * @param sourceId Source ID cần xóa
+     * @return Thông tin folder sau khi xóa source
+     */
+    @DeleteMapping("/{id}/sources/{sourceId}")
+    public ResponseGeneral<FolderDetailResponse> removeSourceFromFolder(
+            @PathVariable("id") Long id,
+            @PathVariable("sourceId") Long sourceId
+    ) {
+        log.info("REST request to remove source ID: {} from folder ID: {}", sourceId, id);
+
+        FolderDetailResponse folder = folderService.removeSourceFromFolder(id, sourceId);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "folder.source.remove.success",
+                folder
         );
     }
 }
