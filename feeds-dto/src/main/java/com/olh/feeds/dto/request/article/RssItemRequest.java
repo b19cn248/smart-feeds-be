@@ -49,4 +49,6 @@ public class RssItemRequest {
     private ItunesRequest itunes;
 
     private List<String> hashtag;
+
+    private List<String> categories;
 }

@@ -39,4 +39,6 @@
 
     <include file="classpath:db/changelog/012-add-columns-to-team-board-articles.xml"/>
 
+    <include file="classpath:db/changelog/013-create-categories-add-source-name.xml"/>
+
 </databaseChangeLog>

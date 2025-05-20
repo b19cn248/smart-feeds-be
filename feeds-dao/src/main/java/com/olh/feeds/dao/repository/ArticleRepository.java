@@ -101,4 +101,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             AND t.isDeleted = false
             """)
     List<Object[]> findTagNamesByArticleIds(@Param("articleIds") List<Long> articleIds);
+
+
+    @Query("""
+            SELECT t.name
+            FROM ArticleTag at
+            JOIN Tag t ON at.tagId = t.id
+            WHERE at.articleId = :id
+            AND at.isDeleted = false
+            AND t.isDeleted = false
+    """)
+    List<String> getHashTagOfArticleById(Long id);
 }

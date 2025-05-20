@@ -50,6 +50,11 @@ public class SourceServiceImpl implements SourceService {
 
         // Lấy danh sách articles của source
         List<ArticleResponse> articles = articleRepository.findBySourceId(sourceId, pageable);
+
+        for (ArticleResponse article : articles) {
+            article.setHashtag(articleRepository.getHashTagOfArticleById(article.getId()));
+        }
+
         log.info("Found {} articles for source ID: {}", articles.size(), sourceId);
 
         // Tạo và trả về SourceArticlesResponse
