@@ -38,6 +38,14 @@ public interface FolderService {
      */
     FolderResponse createFolder(FolderRequest request);
 
+
+    /**
+     * Create a new folder
+     * @param request Folder creation request
+     * @return Created folder
+     */
+    FolderResponse updateFolder(Long id, FolderRequest request);
+
     /**
      * Add a source to a folder
      * @param folderId Folder ID 
@@ -61,4 +69,12 @@ public interface FolderService {
      * @return Folder with paginated articles
      */
     FolderDetailResponse getFolderArticles(Long folderId, Pageable articlesPageable);
+
+    /**
+     * Xóa source khỏi folder
+     * @param folderId Folder ID
+     * @param sourceId Source ID cần xóa
+     * @return Thông tin folder sau khi xóa source
+     */
+    FolderDetailResponse removeSourceFromFolder(Long folderId, Long sourceId);
 }

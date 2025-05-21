@@ -279,34 +279,119 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     @Transactional
+    public FolderResponse updateFolder(Long id, FolderRequest request) {
+        log.info("Updating folder with ID: {}", id);
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new BadRequestException("folder.name.required");
+        }
+        Folder folder = folderRepository.findFolderById(id);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", id);
+            throw new NotFoundException(id.toString(), "folder");
+        }
+        String username = auditorAware.getCurrentAuditor().orElse("system");
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to update folder {}", username, id);
+            throw new BadRequestException("folder.access.denied");
+        }
+        folder.setName(request.getName());
+        folder.setTheme(request.getTheme());
+        folder = folderRepository.save(folder);
+        log.info("Folder updated successfully with ID: {}", folder.getId());
+        return FolderResponse.builder()
+                .id(folder.getId())
+                .name(folder.getName())
+                .theme(folder.getTheme())
+                .userId(folder.getUserId())
+                .createdAt(folder.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
     public FolderDetailResponse addSourceToFolder(Long folderId, FolderSourceRequest request) {
-        log.info("Adding source ID: {} to folder ID: {}", request.getSourceId(), folderId);
+        log.info("Adding sources to folder ID: {}", folderId);
+
+        // Kiểm tra folder tồn tại
         Folder folder = folderRepository.findFolderById(folderId);
         if (folder == null) {
             log.error("Folder not found with ID: {}", folderId);
             throw new NotFoundException(folderId.toString(), "folder");
         }
-        String username = auditorAware.getCurrentAuditor().get();
+
+        // Kiểm tra quyền truy cập
+        String username = auditorAware.getCurrentAuditor().orElse("system");
         if (!folder.getCreatedBy().equals(username)) {
             log.error("User {} does not have permission to access folder {}", username, folderId);
             throw new BadRequestException("folder.access.denied");
         }
-        Source source = sourceRepository.findById(request.getSourceId())
-              .orElseThrow(() -> {
-                  log.error("Source not found with ID: {}", request.getSourceId());
-                  return new NotFoundException(request.getSourceId().toString(), "source");
-              });
-        boolean exists = folderSourceRepository.existsByFolderIdAndSourceId(folderId, request.getSourceId());
-        if (exists) {
-            log.error("Source already exists in folder");
-            throw new ConflictException("folder.source.already.exists");
+
+        // Kiểm tra tất cả sources tồn tại
+        List<Source> sources = sourceRepository.findAllById(request.getSourceIds());
+        if (sources.size() != request.getSourceIds().size()) {
+            log.error("Some sources not found");
+            throw new NotFoundException("source.not.found");
         }
-        FolderSource folderSource = FolderSource.builder()
-              .folderId(folderId)
-              .sourceId(request.getSourceId())
-              .build();
-        folderSourceRepository.save(folderSource);
-        log.info("Source added to folder successfully");
+
+        // Kiểm tra sources đã tồn tại trong folder
+        List<FolderSource> existingSources = folderSourceRepository.findByFolderId(folderId);
+        Set<Long> existingSourceIds = existingSources.stream()
+                .map(FolderSource::getSourceId)
+                .collect(Collectors.toSet());
+
+        List<FolderSource> newFolderSources = new ArrayList<>();
+        for (Long sourceId : request.getSourceIds()) {
+            if (existingSourceIds.contains(sourceId)) {
+                log.warn("Source ID: {} already exists in folder ID: {}", sourceId, folderId);
+                continue;
+            }
+
+            FolderSource folderSource = FolderSource.builder()
+                    .folderId(folderId)
+                    .sourceId(sourceId)
+                    .build();
+            newFolderSources.add(folderSource);
+        }
+
+        if (!newFolderSources.isEmpty()) {
+            folderSourceRepository.saveAll(newFolderSources);
+            log.info("Successfully added {} sources to folder ID: {}", newFolderSources.size(), folderId);
+        }
+
+        return getFolderDetail(folderId);
+    }
+
+    @Override
+    @Transactional
+    public FolderDetailResponse removeSourceFromFolder(Long folderId, Long sourceId) {
+        log.info("Removing source ID: {} from folder ID: {}", sourceId, folderId);
+
+        // Kiểm tra folder tồn tại
+        Folder folder = folderRepository.findFolderById(folderId);
+        if (folder == null) {
+            log.error("Folder not found with ID: {}", folderId);
+            throw new NotFoundException(folderId.toString(), "folder");
+        }
+
+        // Kiểm tra quyền truy cập
+        String username = auditorAware.getCurrentAuditor().orElse("system");
+        if (!folder.getCreatedBy().equals(username)) {
+            log.error("User {} does not have permission to access folder {}", username, folderId);
+            throw new BadRequestException("folder.access.denied");
+        }
+
+        // Kiểm tra source tồn tại trong folder
+        boolean exists = folderSourceRepository.existsByFolderIdAndSourceId(folderId, sourceId);
+        if (!exists) {
+            log.error("Source ID: {} does not exist in folder ID: {}", sourceId, folderId);
+            throw new NotFoundException("folder.source.not.found");
+        }
+
+        // Xóa source khỏi folder
+        folderSourceRepository.deleteByFolderIdAndSourceId(folderId, sourceId);
+        log.info("Successfully removed source ID: {} from folder ID: {}", sourceId, folderId);
+
+        // Trả về thông tin folder sau khi xóa
         return getFolderDetail(folderId);
     }
 

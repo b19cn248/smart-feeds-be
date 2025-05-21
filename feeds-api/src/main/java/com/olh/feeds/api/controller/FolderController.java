@@ -102,10 +102,31 @@ public class FolderController {
         );
     }
 
+
     /**
-     * Thêm source vào folder
+     * Chỉnh sửa folder
+     * @param request Folder creation request
+     * @return Created folder
+     */
+    @PutMapping("/{id}")
+    public ResponseGeneral<FolderResponse> updateFolder(
+          @PathVariable("id") Long id,
+          @Valid @RequestBody FolderRequest request
+    ) {
+        log.info("REST request to update folder: {}", request.getName());
+
+        FolderResponse folder = folderService.updateFolder(id, request);
+        return ResponseGeneral.of(
+              HttpStatus.CREATED.value(),
+              "folder.create.success",
+              folder
+        );
+    }
+
+    /**
+     * Thêm nhiều source vào folder
      * @param id Folder ID
-     * @param request Source to add
+     * @param request Danh sách source IDs cần thêm
      * @return Thông tin folder đã cập nhật
      */
     @PostMapping("/{id}/sources")
@@ -113,7 +134,7 @@ public class FolderController {
             @PathVariable("id") Long id,
             @Valid @RequestBody FolderSourceRequest request
     ) {
-        log.info("REST request to add source ID: {} to folder ID: {}", request.getSourceId(), id);
+        log.info("REST request to add {} sources to folder ID: {}", request.getSourceIds().size(), id);
 
         FolderDetailResponse folder = folderService.addSourceToFolder(id, request);
         return ResponseGeneral.of(
@@ -161,6 +182,27 @@ public class FolderController {
                 HttpStatus.OK.value(),
                 "folder.articles.success",
                 folderService.getFolderArticles(id, articlesPageable)
+        );
+    }
+
+    /**
+     * Xóa source khỏi folder
+     * @param id Folder ID
+     * @param sourceId Source ID cần xóa
+     * @return Thông tin folder sau khi xóa source
+     */
+    @DeleteMapping("/{id}/sources/{sourceId}")
+    public ResponseGeneral<FolderDetailResponse> removeSourceFromFolder(
+            @PathVariable("id") Long id,
+            @PathVariable("sourceId") Long sourceId
+    ) {
+        log.info("REST request to remove source ID: {} from folder ID: {}", sourceId, id);
+
+        FolderDetailResponse folder = folderService.removeSourceFromFolder(id, sourceId);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "folder.source.remove.success",
+                folder
         );
     }
 }
