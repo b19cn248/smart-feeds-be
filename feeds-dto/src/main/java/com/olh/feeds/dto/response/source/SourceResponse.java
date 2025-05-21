@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class SourceResponse {
     private Long id;
     private String url;
+    private String imageUrl;
     private String name;
     private String language;
     private String type;

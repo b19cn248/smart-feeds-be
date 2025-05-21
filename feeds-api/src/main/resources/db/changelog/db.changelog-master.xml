@@ -41,4 +41,6 @@
 
     <include file="classpath:db/changelog/013-create-categories-add-source-name.xml"/>
 
+    <include file="classpath:db/changelog/014-add-image-url-to-sources.xml"/>
+
 </databaseChangeLog>

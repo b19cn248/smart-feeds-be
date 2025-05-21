@@ -15,6 +15,9 @@ public class Source extends BaseEntity {
     @Column(name = "url", nullable = false, length = 512)
     private String url;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "language")
     private String language;
 

@@ -19,7 +19,7 @@ spring:
             trust: ${MAIL_SSL_TRUST:smtp.gmail.com}
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/smart_feed?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${DATASOURCE_URL:jdbc:mysql://10.8.0.1:33061/smart_feed?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -18,7 +18,7 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
     boolean existsByUrl(String url);
 
     @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(" +
-            "s.id, s.url, s.name, s.language, s.type, s.accountId, s.hashtag, " +
+            "s.id, s.url, s.imageUrl, s.name, s.language, s.type, s.accountId, s.hashtag, " +
             "s.userId, s.active, s.createdAt) " +
             "FROM Source s " +
             "WHERE (:active IS NULL OR s.active = :active) " +
@@ -29,7 +29,7 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
             Pageable pageable);
 
     @Query("SELECT new com.olh.feeds.dto.response.source.SourceResponse(" +
-            "s.id, s.url, s.name, s.language, s.type, s.accountId, s.hashtag, " +
+            "s.id, s.url,s.imageUrl, s.name, s.language, s.type, s.accountId, s.hashtag, " +
             "s.userId, s.active, s.createdAt) " +
             "FROM Source s " +
             "WHERE s.id = :sourceId " +
