@@ -15,10 +15,10 @@ public interface TeamBoardNoteRepository extends JpaRepository<TeamBoardNote, Lo
     @Query("""
         SELECT new com.olh.feeds.dto.response.teamboard.TeamBoardNoteResponse(
             tbn.id, tbn.teamBoardId, tbn.articleId, tbn.content, tbn.mentionedUsers,
-            tbn.createdBy, u.name, tbn.createdAt
+            tbn.createdBy, COALESCE(u.name, tbn.createdBy), tbn.createdAt
         )
         FROM TeamBoardNote tbn
-        JOIN User u ON tbn.createdBy = u.email
+        LEFT JOIN User u ON tbn.createdBy = u.email
         WHERE tbn.teamBoardId = :teamBoardId AND tbn.articleId = :articleId AND tbn.isDeleted = false
         ORDER BY tbn.createdAt DESC
         """)
