@@ -41,16 +41,16 @@ public class TeamController {
     }
 
     /**
-     * Get teams for current user
+     * Get members of team
      */
     @GetMapping("/{id}/members")
     public ResponseGeneral<List<TeamMemberResponse>> getMembersOfTeam(
             @PathVariable Long id
     ) {
-        log.info("REST request to get members of team");
+        log.info("REST request to get members of team ID: {}", id);
         return ResponseGeneral.of(
                 HttpStatus.OK.value(),
-                "team.list.success",
+                "team.members.list.success",
                 teamService.getTeamMembers(id)
         );
     }
@@ -72,17 +72,35 @@ public class TeamController {
 
     /**
      * Add member to team
+     * Also syncs member to all team boards of this team
      */
     @PostMapping("/{teamId}/members")
     public ResponseGeneral<TeamMemberResponse> addTeamMember(
             @PathVariable("teamId") Long teamId,
             @Valid @RequestBody TeamMemberRequest request
     ) {
-        log.info("REST request to add member to team ID: {}", teamId);
+        log.info("REST request to add member {} to team ID: {}", request.getEmail(), teamId);
         return ResponseGeneral.of(
                 HttpStatus.OK.value(),
                 "team.member.add.success",
                 teamService.addTeamMember(teamId, request)
+        );
+    }
+
+    /**
+     * Remove member from team
+     * Also syncs removal from all team boards of this team
+     */
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseGeneral<Void> removeTeamMember(
+            @PathVariable("teamId") Long teamId,
+            @PathVariable("userId") Long userId
+    ) {
+        log.info("REST request to remove member ID: {} from team ID: {}", userId, teamId);
+        teamService.removeTeamMember(teamId, userId);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "team.member.remove.success"
         );
     }
 }
