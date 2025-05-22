@@ -83,17 +83,12 @@ public class TeamBoardServiceImpl implements TeamBoardService {
         teamBoard = teamBoardRepository.save(teamBoard);
         log.info("Team board created with ID: {}", teamBoard.getId());
 
-        // Add creator as admin
-        User user = userRepository.findByUsername(username)
+        // Get current user info
+        User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(username, "user"));
 
-        TeamBoardUser teamBoardUser = TeamBoardUser.builder()
-                .teamBoardId(teamBoard.getId())
-                .userId(user.getId())
-                .permission(PERMISSION_ADMIN)
-                .build();
-
-        teamBoardUserRepository.save(teamBoardUser);
+        // REFACTOR: Add all team members to team board
+        addAllTeamMembersToTeamBoard(teamBoard.getId(), team.getId(), currentUser.getId());
 
         return TeamBoardResponse.builder()
                 .id(teamBoard.getId())
@@ -104,6 +99,50 @@ public class TeamBoardServiceImpl implements TeamBoardService {
                 .createdAt(teamBoard.getCreatedAt())
                 .createdBy(username)
                 .build();
+    }
+
+    /**
+     * Helper method to add all team members to team board with appropriate permissions
+     * Creator gets ADMIN permission, other members get VIEW permission
+     *
+     * @param teamBoardId ID of the newly created team board
+     * @param teamId ID of the team
+     * @param creatorUserId ID of the user creating the team board
+     */
+    private void addAllTeamMembersToTeamBoard(Long teamBoardId, Long teamId, Long creatorUserId) {
+        log.info("Adding all team members to team board ID: {} from team ID: {}", teamBoardId, teamId);
+
+        // Get all team members - optimized single query
+        List<TeamUser> teamMembers = teamUserRepository.findByTeamId(teamId);
+
+        if (teamMembers.isEmpty()) {
+            log.warn("No team members found for team ID: {}", teamId);
+            return;
+        }
+
+        // Prepare team board users for batch insert
+        List<TeamBoardUser> teamBoardUsers = new ArrayList<>();
+
+        for (TeamUser teamMember : teamMembers) {
+            // Determine permission: Creator gets ADMIN, others get VIEW
+            String permission = teamMember.getUserId().equals(creatorUserId)
+                    ? PERMISSION_ADMIN
+                    : PERMISSION_VIEW;
+
+            TeamBoardUser teamBoardUser = TeamBoardUser.builder()
+                    .teamBoardId(teamBoardId)
+                    .userId(teamMember.getUserId())
+                    .permission(permission)
+                    .build();
+
+            teamBoardUsers.add(teamBoardUser);
+        }
+
+        // Batch insert for better performance
+        teamBoardUserRepository.saveAll(teamBoardUsers);
+
+        log.info("Successfully added {} team members to team board ID: {}",
+                teamBoardUsers.size(), teamBoardId);
     }
 
     @Override
