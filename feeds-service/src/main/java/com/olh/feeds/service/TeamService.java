@@ -27,7 +27,7 @@ public interface TeamService {
     TeamResponse createTeam(TeamRequest request);
 
     /**
-     * Add member to team
+     * Add member to team and sync to all team boards
      *
      * @param teamId Team ID
      * @param request Member request with email and role
@@ -35,5 +35,19 @@ public interface TeamService {
      */
     TeamMemberResponse addTeamMember(Long teamId, TeamMemberRequest request);
 
+    /**
+     * Remove member from team and sync removal from all team boards
+     *
+     * @param teamId Team ID
+     * @param userId User ID to remove
+     */
+    void removeTeamMember(Long teamId, Long userId);
+
+    /**
+     * Get team members
+     *
+     * @param teamId Team ID
+     * @return List of team members
+     */
     List<TeamMemberResponse> getTeamMembers(Long teamId);
 }
