@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="015-add-article-stats-table" author="smartfeed-developer">
+        <comment>Create article_stats table for tracking article metrics</comment>
+        <createTable tableName="article_stats">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_article_stats_articles" references="articles(id)" nullable="false"/>
+            </column>
+            <column name="view_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="share_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="save_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="engagement_score" type="float" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trending_score" type="float" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_top_story" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+        <addUniqueConstraint tableName="article_stats"
+                             columnNames="article_id"
+                             constraintName="uk_article_stats_article_id"/>
+    </changeSet>
+
+    <changeSet id="015-add-explore-collections-table" author="smartfeed-developer">
+        <comment>Create explore_collections table for grouping articles for explore feature</comment>
+        <createTable tableName="explore_collections">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(512)"/>
+            <column name="image_url" type="varchar(512)"/>
+            <column name="type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-add-explore-collection-rules-table" author="smartfeed-developer">
+        <comment>Create explore_collection_rules table for defining collection content rules</comment>
+        <createTable tableName="explore_collection_rules">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="collection_id" type="bigint">
+                <constraints foreignKeyName="fk_collection_rules_collections" references="explore_collections(id)" nullable="false"/>
+            </column>
+            <column name="rule_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-add-explore-curated-articles-table" author="smartfeed-developer">
+        <comment>Create explore_curated_articles table for manually curated articles in collections</comment>
+        <createTable tableName="explore_curated_articles">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="collection_id" type="bigint">
+                <constraints foreignKeyName="fk_curated_articles_collections" references="explore_collections(id)" nullable="false"/>
+            </column>
+            <column name="article_id" type="bigint">
+                <constraints foreignKeyName="fk_curated_articles_articles" references="articles(id)" nullable="false"/>
+            </column>
+            <column name="priority" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+        <addUniqueConstraint tableName="explore_curated_articles"
+                             columnNames="collection_id, article_id"
+                             constraintName="uk_explore_curated_articles"/>
+    </changeSet>
+
+    <changeSet id="015-add-trending-topics-table" author="smartfeed-developer">
+        <comment>Create trending_topics table for tracking popular topics</comment>
+        <createTable tableName="trending_topics">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="topic_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="bigint">
+                <constraints foreignKeyName="fk_trending_topics_categories" references="categories(id)"/>
+            </column>
+            <column name="score" type="float" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-add-index-article-stats" author="smartfeed-developer">
+        <comment>Add indexes to improve performance for explore and top stories queries</comment>
+        <createIndex indexName="idx_article_stats_view_count" tableName="article_stats">
+            <column name="view_count" descending="true"/>
+        </createIndex>
+        <createIndex indexName="idx_article_stats_trending_score" tableName="article_stats">
+            <column name="trending_score" descending="true"/>
+        </createIndex>
+        <createIndex indexName="idx_article_stats_is_top_story" tableName="article_stats">
+            <column name="is_top_story"/>
+        </createIndex>
+        <createIndex indexName="idx_article_pub_date" tableName="articles">
+            <column name="pub_date" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="015-add-default-explore-collections" author="smartfeed-developer">
+        <comment>Insert default explore collections</comment>
+        <insert tableName="explore_collections">
+            <column name="name">Trending Now</column>
+            <column name="description">Articles trending across all categories</column>
+            <column name="type">TRENDING</column>
+            <column name="priority">100</column>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+        </insert>
+        <insert tableName="explore_collections">
+            <column name="name">Editor's Picks</column>
+            <column name="description">Hand-picked articles by our editorial team</column>
+            <column name="type">CURATED</column>
+            <column name="priority">90</column>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+        </insert>
+        <insert tableName="explore_collections">
+            <column name="name">Technology</column>
+            <column name="description">Latest technology news and updates</column>
+            <column name="type">CATEGORY</column>
+            <column name="priority">80</column>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+        </insert>
+        <insert tableName="explore_collections">
+            <column name="name">Business</column>
+            <column name="description">Business news and market updates</column>
+            <column name="type">CATEGORY</column>
+            <column name="priority">70</column>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
