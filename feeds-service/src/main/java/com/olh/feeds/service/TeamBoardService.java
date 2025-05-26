@@ -148,4 +148,12 @@ public interface TeamBoardService {
      * @return Created newsletter
      */
     TeamBoardNewsletterResponse createNewsletter(Long id, TeamBoardNewsletterRequest request);
+
+    /**
+     * Get team board members
+     *
+     * @param id Team board ID
+     * @return List of team board members
+     */
+    List<TeamBoardMemberSimpleResponse> getTeamBoardMembers(Long id);
 }
