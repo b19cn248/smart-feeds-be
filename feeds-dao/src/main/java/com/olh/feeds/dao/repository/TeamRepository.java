@@ -40,9 +40,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Page<Team> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
-        SELECT COUNT(t) > 0 
-        FROM Team t 
-        WHERE t.id = :id 
+        SELECT COUNT(t) > 0
+        FROM Team t
+        WHERE t.id = :id
             AND t.isDeleted = false
         """)
     boolean existsActiveById(@Param("id") Long id);

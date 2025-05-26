@@ -65,4 +65,16 @@ public interface TeamBoardRepository extends JpaRepository<TeamBoard, Long> {
         WHERE tb.id = :id AND tb.isDeleted = false
         """)
     Optional<TeamBoard> findActiveById(@Param("id") Long id);
+
+    /**
+     * Find all team boards by team ID without pagination for internal sync operations
+     * Performance optimized for bulk operations
+     */
+    @Query("""
+        SELECT tb
+        FROM TeamBoard tb
+        WHERE tb.teamId = :teamId AND tb.isDeleted = false
+        ORDER BY tb.id
+        """)
+    List<TeamBoard> findByTeamIdWithoutPagination(@Param("teamId") Long teamId);
 }

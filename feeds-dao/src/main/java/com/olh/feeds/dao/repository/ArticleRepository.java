@@ -10,21 +10,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-           "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
-           " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-           "from Article a join Source s on a.sourceId = s.id and a.isDeleted = false " )
+            "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
+            " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
+            "from Article a join Source s on a.sourceId = s.id and a.isDeleted = false " )
     Page<ArticleResponse> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-           "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
-           " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-           "from Article a join Source s on a.sourceId = s.id where a.id = :id and a.isDeleted = false")
+            "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
+            " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
+            "from Article a join Source s on a.sourceId = s.id where a.id = :id and a.isDeleted = false")
     Optional<ArticleResponse> findArticleById(Long id);
 
     @Query("SELECT a FROM Article a WHERE a.guid = :guid AND a.isDeleted = false")
@@ -37,22 +38,22 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findByLink(String link);
 
     @Query("select new com.olh.feeds.dto.response.article.ArticleResponse" +
-           "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
-           " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
-           " from Article a join Source s on a.sourceId = s.id " +
-           " where s.id = :sourceId and a.isDeleted = false" +
-           " order by a.createdAt desc")
+            "(a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary," +
+            " a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet) " +
+            " from Article a join Source s on a.sourceId = s.id " +
+            " where s.id = :sourceId and a.isDeleted = false" +
+            " order by a.createdAt desc")
     List<ArticleResponse> findBySourceId(@Param("sourceId") Long sourceId, Pageable pageable);
 
     @Query("select distinct a.sourceId from Article a " +
-           "join Source s on a.sourceId = s.id " +
-           "join FolderSource fs on fs.sourceId = s.id " +
-           "join Folder f on fs.folderId = f.id " +
-           "where f.createdBy = :username " +
-           "and f.isDeleted = false " +
-           "and fs.isDeleted = false " +
-           "and s.isDeleted = false " +
-           "and s.active = true and a.isDeleted = false")
+            "join Source s on a.sourceId = s.id " +
+            "join FolderSource fs on fs.sourceId = s.id " +
+            "join Folder f on fs.folderId = f.id " +
+            "where f.createdBy = :username " +
+            "and f.isDeleted = false " +
+            "and fs.isDeleted = false " +
+            "and s.isDeleted = false " +
+            "and s.active = true and a.isDeleted = false")
     List<Long> findSourceIdsByUsername(@Param("username") String username);
 
     @Query("""
@@ -84,9 +85,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             ORDER BY a.pubDate DESC NULLS LAST, a.createdAt DESC
             """)
     List<ArticleResponse> findBySourceIdInAndKeywordOrderByPublishDateDesc(
-          @Param("sourceIds") List<Long> sourceIds,
-          @Param("keyword") String keyword,
-          Pageable pageable);
+            @Param("sourceIds") List<Long> sourceIds,
+            @Param("keyword") String keyword,
+            Pageable pageable);
 
     @Query("""
             SELECT at.articleId, t.name
@@ -108,4 +109,67 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             AND t.isDeleted = false
     """)
     List<String> getHashTagOfArticleById(Long id);
+
+    // New methods for Explore and Top Stories features
+
+    @Query("""
+            SELECT new com.olh.feeds.dto.response.article.ArticleResponse(
+                a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary,
+                a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet
+            )
+            FROM Article a
+            JOIN Source s ON a.sourceId = s.id
+            JOIN SourceCategory sc ON s.id = sc.sourceId
+            WHERE sc.categoryId = :categoryId
+            AND a.isDeleted = false
+            AND s.isDeleted = false
+            AND sc.isDeleted = false
+            ORDER BY a.pubDate DESC
+            """)
+    Page<ArticleResponse> findArticlesByCategory(
+            @Param("categoryId") Long categoryId,
+            Pageable pageable);
+
+    @Query("""
+            SELECT new com.olh.feeds.dto.response.article.ArticleResponse(
+                a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary,
+                a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet
+            )
+            FROM Article a
+            JOIN Source s ON a.sourceId = s.id
+            WHERE a.isDeleted = false
+            AND s.isDeleted = false
+            AND s.active = true
+            AND a.pubDate >= :fromDate
+            ORDER BY a.pubDate DESC
+            """)
+    Page<ArticleResponse> findRecentArticles(
+            @Param("fromDate") LocalDateTime fromDate,
+            Pageable pageable);
+
+    @Query("""
+            SELECT new com.olh.feeds.dto.response.article.ArticleResponse(
+                a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary,
+                a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet
+            )
+            FROM Article a
+            JOIN Source s ON a.sourceId = s.id
+            LEFT JOIN ArticleTag at ON a.id = at.articleId
+            LEFT JOIN Tag t ON at.tagId = t.id
+            WHERE (
+                LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(a.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            )
+            AND a.isDeleted = false
+            AND s.isDeleted = false
+            AND (at.isDeleted = false OR at IS NULL)
+            AND (t.isDeleted = false OR t IS NULL)
+            GROUP BY a.id, a.title, a.content, a.contentEncoded, a.isoDate, a.summary,
+                    a.event, s.url, a.link, a.creator, a.enclosureUrl, a.contentSnippet, a.contentEncodedSnippet
+            ORDER BY a.pubDate DESC
+            """)
+    Page<ArticleResponse> searchArticles(
+            @Param("keyword") String keyword,
+            Pageable pageable);
 }
