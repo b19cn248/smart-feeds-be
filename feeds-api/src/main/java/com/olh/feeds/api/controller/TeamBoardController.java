@@ -278,4 +278,19 @@ public class TeamBoardController {
                 teamBoardService.createNewsletter(id, request)
         );
     }
+
+    /**
+     * Get team board members
+     */
+    @GetMapping("/{id}/members")
+    public ResponseGeneral<List<TeamBoardMemberSimpleResponse>> getTeamBoardMembers(
+            @PathVariable("id") Long id
+    ) {
+        log.info("REST request to get members for team board ID: {}", id);
+        return ResponseGeneral.of(
+                HttpStatus.OK.value(),
+                "team.board.members.list.success",
+                teamBoardService.getTeamBoardMembers(id)
+        );
+    }
 }

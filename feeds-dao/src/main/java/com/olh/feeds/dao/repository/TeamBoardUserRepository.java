@@ -2,6 +2,7 @@
 package com.olh.feeds.dao.repository;
 
 import com.olh.feeds.dao.entity.TeamBoardUser;
+import com.olh.feeds.dao.repository.dto.TeamBoardMemberDTO;
 import com.olh.feeds.dto.response.teamboard.TeamBoardUserResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -58,4 +59,18 @@ public interface TeamBoardUserRepository extends JpaRepository<TeamBoardUser, Lo
             @Param("teamBoardId") Long teamBoardId,
             @Param("userId") Long userId
     );
+
+    /**
+     * Find team board members with user info
+     *
+     * @param teamBoardId Team board ID
+     * @return List of team board members with user info
+     */
+    @Query("SELECT new com.olh.feeds.dao.repository.dto.TeamBoardMemberDTO(" +
+            "tbu.userId, u.name, u.email) " +
+            "FROM TeamBoardUser tbu " +
+            "JOIN User u ON tbu.userId = u.id " +
+            "WHERE tbu.teamBoardId = :teamBoardId " +
+            "AND tbu.isDeleted = false")
+    List<TeamBoardMemberDTO> findMembersByTeamBoardId(@Param("teamBoardId") Long teamBoardId);
 }
