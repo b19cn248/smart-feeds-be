@@ -43,6 +43,6 @@
 
     <include file="classpath:db/changelog/014-add-image-url-to-sources.xml"/>
 
-    <include file="classpath:db/changelog/015-add-explore-top-stories.xml"/>
+    <include file="classpath:db/changelog/ 015-insert-categories.xml"/>
 
 </databaseChangeLog>
