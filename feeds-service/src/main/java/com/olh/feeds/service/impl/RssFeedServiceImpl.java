@@ -301,12 +301,14 @@ public class RssFeedServiceImpl implements RssFeedService {
         List<SourceCategory> sourceCategories = new ArrayList<>();
 
         for (Long categoryId : categories) {
-            sourceCategories.add(
-                    SourceCategory.builder()
-                            .categoryId(categoryId)
-                            .sourceId(source.getId())
-                            .build()
-            );
+            if (!sourceCategoryRepository.existsBySourceIdAndCategoryId(source.getId(), categoryId)) {
+                sourceCategories.add(
+                        SourceCategory.builder()
+                                .categoryId(categoryId)
+                                .sourceId(source.getId())
+                                .build()
+                );
+            }
         }
 
         sourceCategoryRepository.saveAll(sourceCategories);
