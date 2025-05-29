@@ -2,13 +2,12 @@ package com.olh.feeds.dto.request.article;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -52,5 +51,5 @@ public class RssItemRequest {
 
     private String sourceName;
     private String sourceLink;
-    private List<String> category;
+    private List<Long> categories;
 }

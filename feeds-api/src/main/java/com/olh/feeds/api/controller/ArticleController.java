@@ -8,6 +8,7 @@ import com.olh.feeds.dto.response.article.ArticleResponse;
 import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.service.ArticleService;
 import com.olh.feeds.service.RssFeedService;
+import com.olh.feeds.service.TopStoriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final RssFeedService rssFeedService;
+    private final TopStoriesService topStoriesService;
 
     /**
      * Lấy danh sách articles theo sources mà người dùng đang theo dõi
@@ -67,11 +69,16 @@ public class ArticleController {
     public ResponseGeneral<ArticleResponse> getById(
             @PathVariable Long id
     ) {
-        log.info("REST request to get all articles (legacy API)");
+        log.info("REST request to get article by ID: {}", id);
+        ArticleResponse response = articleService.getArticleById(id);
+
+        // Track article view for stats
+        topStoriesService.trackArticleView(id);
+
         return ResponseGeneral.of(
                 HttpStatus.OK.value(),
-                "articles.list.success",
-                articleService.getArticleById(id)
+                "articles.get.success",
+                response
         );
     }
 

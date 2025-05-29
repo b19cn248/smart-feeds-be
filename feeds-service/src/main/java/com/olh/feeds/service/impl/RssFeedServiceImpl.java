@@ -63,8 +63,8 @@ public class RssFeedServiceImpl implements RssFeedService {
                 Source source = findOrCreateSource(item);
 
                 // Xử lý danh mục cho source
-                if (item.getCategory() != null && !item.getCategory().isEmpty()) {
-                    processCategories(source, item.getCategory());
+                if (item.getCategories() != null && !item.getCategories().isEmpty()) {
+                    processCategories(source, item.getCategories());
                 }
 
                 Article article = createArticleFromRequest(item, source.getId());
@@ -295,70 +295,23 @@ public class RssFeedServiceImpl implements RssFeedService {
     /**
      * Xử lý danh mục cho nguồn tin
      */
-    private void processCategories(Source source, List<String> categoryNames) {
-        log.info("Processing {} categories for source: {}", categoryNames.size(), source.getName());
+    private void processCategories(Source source, List<Long> categories) {
+        log.info("Processing {} categories for source: {}", categories.size(), source.getName());
 
-        if (categoryNames == null || categoryNames.isEmpty()) {
-            return;
-        }
+        List<SourceCategory> sourceCategories = new ArrayList<>();
 
-        // Chuẩn hóa tên danh mục
-        List<String> normalizedCategories = categoryNames.stream()
-                .map(this::normalizeCategory)
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
-
-        if (normalizedCategories.isEmpty()) {
-            log.warn("No valid categories after normalization for source: {}", source.getName());
-            return;
-        }
-
-        // Tìm danh mục đã tồn tại
-        List<Category> existingCategories = categoryRepository.findAllByNameIn(normalizedCategories);
-        Map<String, Category> categoryMap = existingCategories.stream()
-                .collect(Collectors.toMap(Category::getName, c -> c));
-
-        // Tạo mới danh mục chưa tồn tại
-        List<Category> newCategories = new ArrayList<>();
-        for (String categoryName : normalizedCategories) {
-            if (!categoryMap.containsKey(categoryName)) {
-                Category newCategory = Category.builder()
-                        .name(categoryName)
-                        .description("Auto-created from RSS feed")
-                        .build();
-                newCategories.add(newCategory);
-                log.debug("Creating new category: {}", categoryName);
+        for (Long categoryId : categories) {
+            if (!sourceCategoryRepository.existsBySourceIdAndCategoryId(source.getId(), categoryId)) {
+                sourceCategories.add(
+                        SourceCategory.builder()
+                                .categoryId(categoryId)
+                                .sourceId(source.getId())
+                                .build()
+                );
             }
         }
 
-        if (!newCategories.isEmpty()) {
-            List<Category> savedCategories = categoryRepository.saveAll(newCategories);
-            savedCategories.forEach(c -> categoryMap.put(c.getName(), c));
-            log.info("Created {} new categories", savedCategories.size());
-        }
-
-        // Tạo liên kết giữa source và danh mục
-        List<SourceCategory> sourceCategoriesToSave = new ArrayList<>();
-        for (String categoryName : normalizedCategories) {
-            Category category = categoryMap.get(categoryName);
-            if (category != null) {
-                if (!sourceCategoryRepository.existsBySourceIdAndCategoryId(source.getId(), category.getId())) {
-                    SourceCategory sourceCategory = SourceCategory.builder()
-                            .sourceId(source.getId())
-                            .categoryId(category.getId())
-                            .build();
-                    sourceCategoriesToSave.add(sourceCategory);
-                    log.debug("Linking source: {} to category: {}", source.getName(), category.getName());
-                }
-            }
-        }
-
-        if (!sourceCategoriesToSave.isEmpty()) {
-            sourceCategoryRepository.saveAll(sourceCategoriesToSave);
-            log.info("Created {} source-category associations for source: {}",
-                    sourceCategoriesToSave.size(), source.getName());
-        }
+        sourceCategoryRepository.saveAll(sourceCategories);
     }
 
     /**

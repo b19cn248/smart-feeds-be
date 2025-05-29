@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="015-insert-categories" author="smartfeed-developer">
+        <comment>Insert 13 default categories for content classification</comment>
+
+        <!-- 1. Current Affairs -->
+        <insert tableName="categories">
+            <column name="name">Current Affairs</column>
+            <column name="description">Breaking news, political developments, and current events happening around the world</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 2. Economics -->
+        <insert tableName="categories">
+            <column name="name">Economics</column>
+            <column name="description">Financial markets, business news, economic analysis, and investment insights</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 3. Education -->
+        <insert tableName="categories">
+            <column name="name">Education</column>
+            <column name="description">Learning resources, academic research, educational trends, and skill development</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 4. Technology -->
+        <insert tableName="categories">
+            <column name="name">Technology</column>
+            <column name="description">Latest tech innovations, software development, AI, gadgets, and digital transformation</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 5. Entertainment -->
+        <insert tableName="categories">
+            <column name="name">Entertainment</column>
+            <column name="description">Movies, music, TV shows, celebrity news, gaming, and pop culture content</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 6. Sports -->
+        <insert tableName="categories">
+            <column name="name">Sports</column>
+            <column name="description">Sports news, match results, player updates, and athletic competitions</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 7. Health -->
+        <insert tableName="categories">
+            <column name="name">Health</column>
+            <column name="description">Medical news, wellness tips, healthcare trends, and mental health resources</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 8. Lifestyle -->
+        <insert tableName="categories">
+            <column name="name">Lifestyle</column>
+            <column name="description">Fashion, food, home decoration, relationships, and daily living tips</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 9. Travel -->
+        <insert tableName="categories">
+            <column name="name">Travel</column>
+            <column name="description">Travel guides, destination reviews, tourism news, and travel tips</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 10. Legal -->
+        <insert tableName="categories">
+            <column name="name">Legal</column>
+            <column name="description">Legal news, court decisions, law changes, and legal advice</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 11. Science & Environment -->
+        <insert tableName="categories">
+            <column name="name">Science &amp; Environment</column>
+            <column name="description">Scientific discoveries, environmental issues, climate change, and sustainability</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 12. Automotive & Transportation -->
+        <insert tableName="categories">
+            <column name="name">Automotive &amp; Transportation</column>
+            <column name="description">Car reviews, transportation news, vehicle technology, and mobility trends</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+        <!-- 13. Opinion & Perspective -->
+        <insert tableName="categories">
+            <column name="name">Opinion &amp; Perspective</column>
+            <column name="description">Editorial articles, personal stories, opinion pieces, and thought-provoking content</column>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="created_by">system</column>
+            <column name="updated_by">system</column>
+            <column name="is_deleted" valueNumeric="0"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
