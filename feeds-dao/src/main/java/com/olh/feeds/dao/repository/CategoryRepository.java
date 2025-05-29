@@ -2,6 +2,7 @@ package com.olh.feeds.dao.repository;
 
 import com.olh.feeds.dao.entity.Category;
 import com.olh.feeds.dto.response.article.ArticleResponse;
+import com.olh.feeds.dto.response.category.CategoryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +21,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByName(@Param("name") String name);
 
     @Query("""
-            SELECT c FROM Category c 
+            SELECT c FROM Category c
             WHERE c.name IN :names AND c.isDeleted = false
             """)
     List<Category> findAllByNameIn(@Param("names") List<String> names);
@@ -38,4 +39,12 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             @Param("categoryId") Long categoryId,
             Pageable pageable
     );
+
+    @Query("""
+             SELECT new com.olh.feeds.dto.response.category.CategoryResponse(
+                 c.id, c.name, c.description
+             ) FROM Category c
+             WHERE c.isDeleted = false
+            """)
+    List<CategoryResponse> getAllCategories();
 }
