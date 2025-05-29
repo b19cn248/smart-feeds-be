@@ -34,6 +34,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             join Source s on sc.sourceId = s.id
             join Article a on a.sourceId = s.id
             where c.id = :categoryId and a.isDeleted = false
+            order by a.createdAt
             """)
     Page<ArticleResponse> getArticlesByCategoryId(
             @Param("categoryId") Long categoryId,
