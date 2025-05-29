@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -860,5 +861,23 @@ public class TeamBoardServiceImpl implements TeamBoardService {
         }
 
         return teamBoard;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TeamBoardMemberSimpleResponse> getTeamBoardMembers(Long id) {
+        log.info("Getting members for team board ID: {}", id);
+
+        // Check if team board exists and user has view permission
+        TeamBoard teamBoard = getTeamBoardWithPermissionCheck(id, ALL_PERMISSIONS);
+
+        // Get team board members with user info
+        return teamBoardUserRepository.findMembersByTeamBoardId(id).stream()
+                .map(member -> TeamBoardMemberSimpleResponse.builder()
+                        .id(member.getUserId())
+                        .name(member.getName())
+                        .email(member.getEmail())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
