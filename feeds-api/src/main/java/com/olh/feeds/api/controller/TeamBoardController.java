@@ -205,13 +205,14 @@ public class TeamBoardController {
     @PostMapping("/{id}/notes")
     public ResponseGeneral<TeamBoardNoteResponse> addNoteToArticle(
             @PathVariable("id") Long id,
-            @Valid @RequestBody TeamBoardNoteRequest request
+            @Valid @RequestBody TeamBoardNoteRequest request,
+            @RequestParam(required = false) Long recipientId
     ) {
         log.info("REST request to add note to article ID: {} in team board ID: {}", request.getArticleId(), id);
         return ResponseGeneral.of(
                 HttpStatus.CREATED.value(),
                 "team.board.note.add.success",
-                teamBoardService.addNoteToArticle(id, request)
+                teamBoardService.addNoteToArticle(id, request, recipientId)
         );
     }
 

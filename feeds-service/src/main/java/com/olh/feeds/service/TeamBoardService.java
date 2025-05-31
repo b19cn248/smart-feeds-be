@@ -109,9 +109,10 @@ public interface TeamBoardService {
      *
      * @param id Team board ID
      * @param request Note content and article ID
+     * @param recipientId Recipient ID
      * @return Created note
      */
-    TeamBoardNoteResponse addNoteToArticle(Long id, TeamBoardNoteRequest request);
+    TeamBoardNoteResponse addNoteToArticle(Long id, TeamBoardNoteRequest request, Long recipientId);
 
     /**
      * Get notes for article in team board
