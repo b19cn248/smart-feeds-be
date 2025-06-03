@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="016-create-notifications-table" author="smartfeed-developer">
+        <comment>Create notifications table for storing user notifications</comment>
+        <createTable tableName="notifications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title_en" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_en" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(1024)"/>
+            <column name="notification_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_id" type="bigint">
+                <constraints foreignKeyName="fk_notifications_sender" references="users(id)"/>
+            </column>
+            <column name="recipient_id" type="bigint">
+                <constraints foreignKeyName="fk_notifications_recipient" references="users(id)"/>
+            </column>
+            <column name="read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)"/>
+            <column name="updated_by" type="varchar(255)"/>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <createIndex tableName="notifications" indexName="idx_notifications_recipient">
+            <column name="recipient_id"/>
+        </createIndex>
+
+        <createIndex tableName="notifications" indexName="idx_notifications_type">
+            <column name="notification_type"/>
+        </createIndex>
+
+        <createIndex tableName="notifications" indexName="idx_notifications_created_at">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="001-add-is-read-to-notifications" author="yourname">
+        <addColumn tableName="notifications">
+            <column name="is_read" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="001-fix-notifications-table" author="yourname">
+        <addColumn tableName="notifications">
+            <column name="timestamp" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog> 

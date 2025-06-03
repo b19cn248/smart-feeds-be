@@ -14,8 +14,6 @@
     <!-- Content Management Tables -->
     <include file="classpath:db/changelog/003-content-management-tables.xml"/>
 
-    <!-- User Feature Tables -->
-    <include file="classpath:db/changelog/004-user-feature-tables.xml"/>
 
     <!-- Enterprise Feature Tables -->
     <include file="classpath:db/changelog/005-enterprise-feature-tables.xml"/>
@@ -43,6 +41,8 @@
 
     <include file="classpath:db/changelog/014-add-image-url-to-sources.xml"/>
 
-    <include file="classpath:db/changelog/ 015-insert-categories.xml"/>
+    <include file="classpath:db/changelog/015-insert-categories.xml"/>
+
+    <include file="classpath:db/changelog/016-add-notification-tables.xml"/>
 
 </databaseChangeLog>
