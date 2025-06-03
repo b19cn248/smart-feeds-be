@@ -39,6 +39,10 @@
     {
       "path": "/api/v1/gemini/generate",
       "enforcement-mode": "DISABLED"
+    },
+    {
+      "path": "/api/v1/n8n/*",
+      "enforcement-mode": "DISABLED"
     }
   ]
 }

@@ -78,4 +78,8 @@ gemini:
     key: AIzaSyCbAIe1WT9x9_40dv_jkTLgrsTXyKBHJDM
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
 
+n8n:
+  base-url: https://n8n.openlearnhub.io.vn
+  api-key: ${N8N_API_KEY:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODBjY2YzNS1hZjk4LTRmMzMtYjhhZS00NjAzMGRiMTQ4MmQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ4OTM5NDAxfQ.gJi5CZv31BONQtab9L3JjhY9FBGG-qDvRbh81geOCyE}
+
 
