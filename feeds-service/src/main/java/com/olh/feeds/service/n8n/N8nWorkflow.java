@@ -1,4 +1,4 @@
-package com.olh.feeds.api.n8n;
+package com.olh.feeds.service.n8n;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

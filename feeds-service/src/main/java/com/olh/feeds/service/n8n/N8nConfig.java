@@ -1,4 +1,4 @@
-package com.olh.feeds.api.n8n;
+package com.olh.feeds.service.n8n;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

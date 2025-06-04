@@ -1,10 +1,12 @@
 package com.olh.feeds.api.controller;
 
 import com.olh.feeds.core.exception.response.ResponseGeneral;
+import com.olh.feeds.dto.request.source.AddSourceRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.dto.response.source.SourceResponse;
 import com.olh.feeds.service.SourceService;
+import com.olh.feeds.service.facade.SourceFacadeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class SourceController {
 
     private final SourceService sourceService;
+    private final SourceFacadeService sourceFacadeService;
 
     /**
      * Get all sources with optional filtering by active status
@@ -65,6 +68,18 @@ public class SourceController {
                 HttpStatus.OK.value(),
                 "source.articles.success",
                 sourceService.getSourceWithArticles(sourceId, pageable)
+        );
+    }
+
+    @PostMapping
+    public ResponseGeneral<SourceResponse> addSource(@RequestBody AddSourceRequest addSourceRequest) {
+        log.info("REST request to add source: {}", addSourceRequest);
+
+        sourceFacadeService.addSource(addSourceRequest);
+
+        return ResponseGeneral.of(
+                HttpStatus.CREATED.value(),
+                "create source successfully"
         );
     }
 }

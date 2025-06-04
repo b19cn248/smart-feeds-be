@@ -2,9 +2,13 @@
 package com.olh.feeds.service.impl;
 
 import com.olh.feeds.core.exception.base.NotFoundException;
+import com.olh.feeds.dao.entity.Source;
+import com.olh.feeds.dao.entity.SourceCategory;
 import com.olh.feeds.dao.repository.ArticleRepository;
+import com.olh.feeds.dao.repository.SourceCategoryRepository;
 import com.olh.feeds.dao.repository.SourceRepository;
 import com.olh.feeds.dto.mapper.PageMapper;
+import com.olh.feeds.dto.request.source.AddSourceRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.ArticleResponse;
 import com.olh.feeds.dto.response.article.SourceArticlesResponse;
@@ -15,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +31,7 @@ public class SourceServiceImpl implements SourceService {
     private final SourceRepository sourceRepository;
     private final PageMapper pageMapper;
     private final ArticleRepository articleRepository;
+    private final SourceCategoryRepository sourceCategoryRepository;
 
     @Override
     public PageResponse<SourceResponse> getAllSources(Boolean active, Pageable pageable) {
@@ -62,5 +68,24 @@ public class SourceServiceImpl implements SourceService {
                 .source(sourceResponse)
                 .articles(articles)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void addSource(AddSourceRequest addSourceRequest) {
+
+        Source source = Source.builder()
+                .name(addSourceRequest.getName())
+                .url(addSourceRequest.getUrl())
+                .build();
+
+        Source savedSource = sourceRepository.save(source);
+
+        SourceCategory sourceCategory = SourceCategory.builder()
+                .sourceId(savedSource.getId())
+                .categoryId(addSourceRequest.getCategoryId())
+                .build();
+
+        sourceCategoryRepository.save(sourceCategory);
     }
 }

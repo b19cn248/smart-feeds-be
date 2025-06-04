@@ -1,6 +1,7 @@
 // feeds-service/src/main/java/com/olh/feeds/service/SourceService.java
 package com.olh.feeds.service;
 
+import com.olh.feeds.dto.request.source.AddSourceRequest;
 import com.olh.feeds.dto.response.PageResponse;
 import com.olh.feeds.dto.response.article.SourceArticlesResponse;
 import com.olh.feeds.dto.response.source.SourceResponse;
@@ -16,4 +17,6 @@ public interface SourceService {
     PageResponse<SourceResponse> getAllSources(Boolean active, Pageable pageable);
 
     SourceArticlesResponse getSourceWithArticles(Long sourceId, Pageable pageable);
+
+    void addSource(AddSourceRequest addSourceRequest);
 }
